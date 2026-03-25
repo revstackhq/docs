@@ -4,7 +4,9 @@
   "theme": "mint",
   "favicon": "/logo/logo.png",
   "colors": {
-    "primary": "#ff592c"
+    "primary": "#ff592c",
+    "dark": "#ff592c",
+    "light": "#ff592c"
   },
   "logo": {
     "dark": "/logo/logo.png",
@@ -105,53 +107,6 @@
               "api-reference/authentication",
               "api-reference/errors"
             ]
-          },
-          {
-            "group": "Catalog",
-            "pages": [
-              "api-reference/plans",
-              "api-reference/plan-entitlements",
-              "api-reference/prices",
-              "api-reference/addons",
-              "api-reference/addon-entitlements",
-              "api-reference/coupons"
-            ]
-          },
-          {
-            "group": "Customers & Access",
-            "pages": [
-              "api-reference/customers",
-              "api-reference/users",
-              "api-reference/entitlements",
-              "api-reference/auth"
-            ]
-          },
-          {
-            "group": "Billing & Usage",
-            "pages": [
-              "api-reference/subscriptions",
-              "api-reference/usage",
-              "api-reference/invoices",
-              "api-reference/payments",
-              "api-reference/refunds",
-              "api-reference/credit-notes",
-              "api-reference/wallets"
-            ]
-          },
-          {
-            "group": "System & Config",
-            "pages": [
-              "api-reference/environments",
-              "api-reference/api-keys",
-              "api-reference/webhooks",
-              "api-reference/integrations",
-              "api-reference/provider-events",
-              "api-reference/audit"
-            ]
-          },
-          {
-            "group": "Admin",
-            "pages": ["api-reference/studio"]
           }
         ]
       }
