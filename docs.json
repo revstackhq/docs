@@ -2,17 +2,42 @@
   "$schema": "https://mintlify.com/docs.json",
   "name": "Revstack",
   "theme": "mint",
-  "favicon": "/logo/dark.png",
+  "favicon": "/logo/logo.png",
   "colors": {
-    "primary": "#0D9373"
+    "primary": "#ff592c"
   },
   "logo": {
-    "dark": "/logo/dark.png",
-    "light": "/logo/light.png"
+    "dark": "/logo/logo.png",
+    "light": "/logo/logo.png"
   },
   "api": {
     "openapi": "openapi.json"
   },
+  "description": "Open Source Billing OS for Developers. The scalable, developer-first billing engine with subscriptions, invoicing, usage metering, and entitlements.",
+  "fonts": {
+    "body": {
+      "family": "Geist",
+      "format": "woff2",
+      "weight": 400
+    },
+    "heading": {
+      "family": "Geist",
+      "format": "woff2",
+      "weight": 600
+    }
+  },
+  "icons": {
+    "library": "lucide"
+  },
+  "styling": {
+    "codeblocks": "dark"
+  },
+  "redirects": [
+    {
+      "source": "/",
+      "destination": "/guides"
+    }
+  ],
   "navigation": {
     "tabs": [
       {
@@ -21,8 +46,8 @@
           {
             "group": "Get Started",
             "pages": [
-              "introduction",
-              "quickstart",
+              "guides/introduction",
+              "guides/quickstart",
               "guides/cli",
               "guides/billing-as-code"
             ]
@@ -51,21 +76,21 @@
           },
           {
             "group": "Integrations",
-            "pages": ["providers/stripe", "providers/polar"]
+            "pages": ["guides/providers/stripe", "guides/providers/polar"]
           },
           {
             "group": "SDKs & Clients",
             "pages": [
-              "sdks/react",
-              "sdks/vanilla-js",
-              "sdks/node",
-              "sdks/nextjs",
-              "sdks/vercel-ai-wrapper"
+              "guides/sdks/react",
+              "guides/sdks/vanilla-js",
+              "guides/sdks/node",
+              "guides/sdks/nextjs",
+              "guides/sdks/vercel-ai-wrapper"
             ]
           },
           {
             "group": "Deployment",
-            "pages": ["deployment/self-hosted"]
+            "pages": ["guides/deployment/self-hosted"]
           }
         ]
       },
