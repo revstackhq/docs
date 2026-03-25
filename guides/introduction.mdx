@@ -1,0 +1,62 @@
+---
+title: "Introduction"
+description: "Monetize your software in minutes. The open-source Billing OS for modern SaaS."
+---
+
+Building and maintaining an internal billing system is a massive resource sink for engineering teams. **Revstack** solves this by treating billing as infrastructure. We decouple your application's business logic from payment providers, eliminate webhook hell, and give you a centralized engine to control your revenue.
+
+Whether you are launching a B2B SaaS, an AI wrapper with metered tokens, or a pay-as-you-go API, Revstack abstracts the chaos of billing states into clean, predictable primitives.
+
+## The Revstack Philosophy
+
+We believe pricing should be defined in your codebase, not clicked through in a dashboard.
+
+- **Billing as Code:** Define your plans, entitlements, and limits in a single `revstack.config.ts`. Version it, review it in PRs, and push it to the edge with our CLI.
+- **Zero Webhooks:** Stop maintaining fragile endpoint handlers. Revstack orchestrates the subscription lifecycle for you so you can query the current state directly instead of reacting to events.
+- **Agnostic Gateway:** Bring your own identity (Clerk, Supabase, Auth0) and charge through any provider (Stripe, Polar). Switch gateways without touching your app logic.
+
+---
+
+## Explore the Engine
+
+<CardGroup cols={2}>
+  <Card title="Quickstart" icon="rocket" href="/quickstart">
+    From codebase to first revenue in minutes. Deploy the engine locally and
+    make your first API call.
+  </Card>
+  <Card
+    title="Billing as Code"
+    icon="code-branch"
+    href="/guides/billing-as-code"
+  >
+    Learn how to define your pricing truth in code and sync it using the
+    Revstack CLI.
+  </Card>
+  <Card title="Entitlements & Access" icon="lock" href="/guides/entitlements">
+    Gate features in one line. Check boolean, metered, or JSON primitives in
+    sub-milliseconds at the edge.
+  </Card>
+  <Card title="Wallets & Metering" icon="coins" href="/guides/metering">
+    Issue prepaid AI credits, auto-deduct usage in real-time, and smoothly
+    fallback to overage rates.
+  </Card>
+</CardGroup>
+
+## Drop-in Monetization UX
+
+Don't reinvent the wheel. Revstack provides fully localized, high-converting interfaces so you can focus on building your core product.
+
+<CardGroup cols={2}>
+  <Card title="Hosted Checkout" icon="credit-card" href="/guides/checkout">
+    Drop-in payment pages optimized for conversions, prorations, and global tax
+    compliance.
+  </Card>
+  <Card
+    title="Self-Serve Portal"
+    icon="user-gear"
+    href="/guides/customer-portal"
+  >
+    Zero-code dashboards for your users to upgrade plans, manage seats, and
+    download invoices.
+  </Card>
+</CardGroup>

@@ -1,34 +1,133 @@
 {
   "$schema": "https://mintlify.com/docs.json",
+  "name": "Revstack",
   "theme": "mint",
-  "name": "Revstack Docs",
+  "favicon": "/logo/dark.png",
   "colors": {
     "primary": "#0D9373"
   },
+  "logo": {
+    "dark": "/logo/dark.png",
+    "light": "/logo/light.png"
+  },
+  "api": {
+    "openapi": "openapi.json"
+  },
   "navigation": {
-    "groups": [
+    "tabs": [
       {
-        "group": "Get Started",
-        "pages": ["introduction", "quickstart", "architecture"]
-      },
-      {
-        "group": "Core Platform",
-        "pages": [
-          "platform/plans-and-prices",
-          "platform/entitlements",
-          "platform/identity-protection"
+        "tab": "Guides",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "quickstart",
+              "guides/cli",
+              "guides/billing-as-code"
+            ]
+          },
+          {
+            "group": "Core Concepts",
+            "pages": [
+              "guides/pricing-models",
+              "guides/plans",
+              "guides/prices",
+              "guides/entitlements"
+            ]
+          },
+          {
+            "group": "Monetization & UX",
+            "pages": [
+              "guides/metering",
+              "guides/checkout",
+              "guides/customer-portal",
+              "guides/paywall"
+            ]
+          },
+          {
+            "group": "Security & Identity",
+            "pages": ["guides/authentication"]
+          },
+          {
+            "group": "Integrations",
+            "pages": ["providers/stripe", "providers/polar"]
+          },
+          {
+            "group": "SDKs & Clients",
+            "pages": [
+              "sdks/react",
+              "sdks/vanilla-js",
+              "sdks/node",
+              "sdks/nextjs",
+              "sdks/vercel-ai-wrapper"
+            ]
+          },
+          {
+            "group": "Deployment",
+            "pages": ["deployment/self-hosted"]
+          }
         ]
       },
       {
-        "group": "SDK Reference",
-        "pages": ["sdks/react-hooks", "sdks/node-client"]
-      },
-      {
-        "group": "Open Source Ecosystem",
-        "pages": [
-          "oss/introduction",
-          "oss/provider-protocol",
-          "oss/create-custom-provider"
+        "tab": "API Reference",
+        "openapi": "openapi.json",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": [
+              "api-reference/introduction",
+              "api-reference/authentication",
+              "api-reference/errors"
+            ]
+          },
+          {
+            "group": "Catalog",
+            "pages": [
+              "api-reference/plans",
+              "api-reference/plan-entitlements",
+              "api-reference/prices",
+              "api-reference/addons",
+              "api-reference/addon-entitlements",
+              "api-reference/coupons"
+            ]
+          },
+          {
+            "group": "Customers & Access",
+            "pages": [
+              "api-reference/customers",
+              "api-reference/users",
+              "api-reference/entitlements",
+              "api-reference/auth"
+            ]
+          },
+          {
+            "group": "Billing & Usage",
+            "pages": [
+              "api-reference/subscriptions",
+              "api-reference/usage",
+              "api-reference/invoices",
+              "api-reference/payments",
+              "api-reference/refunds",
+              "api-reference/credit-notes",
+              "api-reference/wallets"
+            ]
+          },
+          {
+            "group": "System & Config",
+            "pages": [
+              "api-reference/environments",
+              "api-reference/api-keys",
+              "api-reference/webhooks",
+              "api-reference/integrations",
+              "api-reference/provider-events",
+              "api-reference/audit"
+            ]
+          },
+          {
+            "group": "Admin",
+            "pages": ["api-reference/studio"]
+          }
         ]
       }
     ]

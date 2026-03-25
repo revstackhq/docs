@@ -1,0 +1,3356 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Revstack API",
+    "version": "0.1.0",
+    "description": "Open Source Billing OS for Developers. The scalable, developer-first billing engine with subscriptions, invoicing, usage metering, and entitlements."
+  },
+  "servers": [
+    {
+      "url": "https://revstack.dev",
+      "description": "Revstack API"
+    }
+  ],
+  "components": { "schemas": {}, "parameters": {} },
+  "paths": {
+    "/v1/addon-entitlements/{addonId}": {
+      "post": {
+        "tags": ["Addon Entitlements"],
+        "summary": "Attach an entitlement to an addon",
+        "description": "Links an entitlement definition to an addon.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "example": "add_abc123" },
+            "required": true,
+            "name": "addonId",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "entitlementId": { "type": "string", "minLength": 1 },
+                  "metadata": {
+                    "type": "object",
+                    "additionalProperties": { "nullable": true }
+                  }
+                },
+                "required": ["entitlementId"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Addon entitlement created",
+            "content": {
+              "application/json": { "schema": { "nullable": true } }
+            }
+          },
+          "400": { "description": "Validation error" }
+        }
+      }
+    },
+    "/v1/addon-entitlements": {
+      "get": {
+        "tags": ["Addon Entitlements"],
+        "summary": "List addon entitlements",
+        "description": "Retrieves all entitlements linked to addons, optionally filtered by addonId.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "minLength": 1 },
+            "required": true,
+            "name": "addonId",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of addon entitlements",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "nullable": true } }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/addon-entitlements/{addonId}/{entitlementId}": {
+      "get": {
+        "tags": ["Addon Entitlements"],
+        "summary": "Get an addon entitlement",
+        "description": "Retrieves a specific addon-entitlement association by composite key.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "example": "add_abc123" },
+            "required": true,
+            "name": "addonId",
+            "in": "path"
+          },
+          {
+            "schema": { "type": "string", "example": "ent_abc123" },
+            "required": true,
+            "name": "entitlementId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Addon entitlement details",
+            "content": {
+              "application/json": { "schema": { "nullable": true } }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Addon Entitlements"],
+        "summary": "Detach an entitlement from an addon",
+        "description": "Removes an addon-entitlement association.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "example": "add_abc123" },
+            "required": true,
+            "name": "addonId",
+            "in": "path"
+          },
+          {
+            "schema": { "type": "string", "example": "ent_abc123" },
+            "required": true,
+            "name": "entitlementId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Addon entitlement removed",
+            "content": {
+              "application/json": { "schema": { "nullable": true } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/addons": {
+      "post": {
+        "tags": ["Addons"],
+        "summary": "Create an addon",
+        "description": "Creates a new purchasable addon that can be attached to subscriptions.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "environmentId": { "type": "string", "minLength": 1 },
+                  "name": { "type": "string", "minLength": 1 },
+                  "type": { "type": "string", "enum": ["flat", "metered"] },
+                  "metadata": {
+                    "type": "object",
+                    "additionalProperties": { "nullable": true }
+                  }
+                },
+                "required": ["environmentId", "name", "type"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Addon created",
+            "content": {
+              "application/json": { "schema": { "nullable": true } }
+            }
+          },
+          "400": { "description": "Validation error" }
+        }
+      },
+      "get": {
+        "tags": ["Addons"],
+        "summary": "List addons",
+        "description": "Retrieves addons with optional filtering.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "minLength": 1 },
+            "required": true,
+            "name": "environmentId",
+            "in": "query"
+          },
+          {
+            "schema": { "type": "string", "enum": ["true", "false"] },
+            "required": false,
+            "name": "isArchived",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of addons",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "nullable": true } }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/addons/bulk": {
+      "post": {
+        "tags": ["Addons"],
+        "summary": "Bulk create addons",
+        "description": "Creates multiple addons in a single request.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "addons": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "environmentId": { "type": "string", "minLength": 1 },
+                        "name": { "type": "string", "minLength": 1 },
+                        "type": {
+                          "type": "string",
+                          "enum": ["flat", "metered"]
+                        },
+                        "metadata": {
+                          "type": "object",
+                          "additionalProperties": { "nullable": true }
+                        }
+                      },
+                      "required": ["environmentId", "name", "type"]
+                    },
+                    "minItems": 1
+                  }
+                },
+                "required": ["addons"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Addons created",
+            "content": {
+              "application/json": { "schema": { "nullable": true } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/addons/{id}/archive": {
+      "patch": {
+        "tags": ["Addons"],
+        "summary": "Archive an addon",
+        "description": "Marks an addon as archived, preventing new purchases.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "example": "add_abc123" },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Addon archived",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "message": { "type": "string" }
+                  },
+                  "required": ["success", "message"]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/addons/{id}": {
+      "get": {
+        "tags": ["Addons"],
+        "summary": "Get an addon",
+        "description": "Retrieves a single addon by ID.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "example": "add_abc123" },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Addon details",
+            "content": {
+              "application/json": { "schema": { "nullable": true } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/audit": {
+      "get": {
+        "tags": ["Audit"],
+        "summary": "List audit logs",
+        "description": "Retrieves audit log entries with optional filtering by actor, action, and resource.",
+        "parameters": [
+          {
+            "schema": { "type": "string" },
+            "required": false,
+            "name": "environmentId",
+            "in": "query"
+          },
+          {
+            "schema": { "type": "string" },
+            "required": false,
+            "name": "actorId",
+            "in": "query"
+          },
+          {
+            "schema": { "type": "string" },
+            "required": false,
+            "name": "action",
+            "in": "query"
+          },
+          {
+            "schema": { "type": "string" },
+            "required": false,
+            "name": "resource",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of audit logs",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "nullable": true } }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/audit/{id}": {
+      "get": {
+        "tags": ["Audit"],
+        "summary": "Get an audit log entry",
+        "description": "Retrieves a single audit log entry by ID.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "example": "alog_abc123" },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Audit log details",
+            "content": {
+              "application/json": { "schema": { "nullable": true } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/auth": {
+      "put": {
+        "tags": ["Auth"],
+        "summary": "Upsert auth configuration",
+        "description": "Creates or replaces the authentication provider configuration (JWKS/JWT) for an environment.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "environmentId": { "type": "string", "minLength": 1 },
+                  "provider": {
+                    "type": "string",
+                    "enum": ["clerk", "supabase", "firebase", "auth0", "custom"]
+                  },
+                  "strategy": { "type": "string", "enum": ["jwt", "jwks"] },
+                  "jwksUri": { "type": "string", "format": "uri" },
+                  "signingSecret": { "type": "string" },
+                  "issuer": { "type": "string" },
+                  "audience": { "type": "string" },
+                  "userIdClaim": { "type": "string", "minLength": 1 }
+                },
+                "required": [
+                  "environmentId",
+                  "provider",
+                  "strategy",
+                  "userIdClaim"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Auth config saved",
+            "content": {
+              "application/json": { "schema": { "nullable": true } }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": ["Auth"],
+        "summary": "List auth configurations",
+        "description": "Retrieves all authentication configurations for an environment.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "minLength": 1 },
+            "required": true,
+            "name": "environmentId",
+            "in": "query"
+          },
+          {
+            "schema": { "type": "string", "enum": ["active", "archived"] },
+            "required": false,
+            "name": "status",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of auth configs",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "nullable": true } }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/auth/{id}": {
+      "get": {
+        "tags": ["Auth"],
+        "summary": "Get an auth configuration",
+        "description": "Retrieves a specific authentication configuration by ID.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "example": "auth_abc123" },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Auth config details",
+            "content": {
+              "application/json": { "schema": { "nullable": true } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/coupons": {
+      "post": {
+        "tags": ["Coupons"],
+        "summary": "Create a coupon",
+        "description": "Creates a new discount coupon with percentage or fixed amount.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "environmentId": { "type": "string", "minLength": 1 },
+                  "code": { "type": "string", "minLength": 1 },
+                  "type": { "type": "string", "enum": ["percent", "fixed"] },
+                  "amount": { "type": "number", "minimum": 0 },
+                  "metadata": {
+                    "type": "object",
+                    "additionalProperties": { "nullable": true }
+                  }
+                },
+                "required": ["environmentId", "code", "type", "amount"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Coupon created",
+            "content": {
+              "application/json": { "schema": { "nullable": true } }
+            }
+          },
+          "400": { "description": "Validation error" }
+        }
+      },
+      "get": {
+        "tags": ["Coupons"],
+        "summary": "List coupons",
+        "description": "Retrieves coupons with optional environment and status filters.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "minLength": 1 },
+            "required": true,
+            "name": "environmentId",
+            "in": "query"
+          },
+          {
+            "schema": { "type": "string", "enum": ["true", "false"] },
+            "required": false,
+            "name": "isActive",
+            "in": "query"
+          },
+          {
+            "schema": { "type": "string", "enum": ["true", "false"] },
+            "required": false,
+            "name": "isArchived",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of coupons",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "nullable": true } }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/coupons/{id}": {
+      "patch": {
+        "tags": ["Coupons"],
+        "summary": "Update a coupon",
+        "description": "Updates the active status or metadata of a coupon.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "example": "coup_abc123" },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "isActive": { "type": "boolean" },
+                  "metadata": {
+                    "type": "object",
+                    "additionalProperties": { "nullable": true }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Coupon updated",
+            "content": {
+              "application/json": { "schema": { "nullable": true } }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Coupons"],
+        "summary": "Delete a coupon",
+        "description": "Permanently deletes a coupon.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "example": "coup_abc123" },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Coupon deleted",
+            "content": {
+              "application/json": { "schema": { "nullable": true } }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": ["Coupons"],
+        "summary": "Get a coupon",
+        "description": "Retrieves a single coupon by ID.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "example": "coup_abc123" },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Coupon details",
+            "content": {
+              "application/json": { "schema": { "nullable": true } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/coupons/{id}/archive": {
+      "patch": {
+        "tags": ["Coupons"],
+        "summary": "Archive a coupon",
+        "description": "Archives a coupon, automatically deactivating it.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "example": "coup_abc123" },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Coupon archived",
+            "content": {
+              "application/json": { "schema": { "nullable": true } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/credit-notes": {
+      "post": {
+        "tags": ["Credit Notes"],
+        "summary": "Create a credit note",
+        "description": "Issues a credit note against an invoice for partial or full refund.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "invoiceId": { "type": "string", "minLength": 1 },
+                  "amount": {
+                    "type": "number",
+                    "minimum": 0,
+                    "exclusiveMinimum": true
+                  },
+                  "reason": { "type": "string" }
+                },
+                "required": ["invoiceId", "amount"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Credit note created",
+            "content": {
+              "application/json": { "schema": { "nullable": true } }
+            }
+          },
+          "400": { "description": "Validation error" }
+        }
+      },
+      "get": {
+        "tags": ["Credit Notes"],
+        "summary": "List credit notes",
+        "description": "Retrieves credit notes with optional filters.",
+        "parameters": [
+          {
+            "schema": { "type": "string" },
+            "required": false,
+            "name": "invoiceId",
+            "in": "query"
+          },
+          {
+            "schema": { "type": "string", "enum": ["issued", "void"] },
+            "required": false,
+            "name": "status",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of credit notes",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "nullable": true } }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/credit-notes/{id}": {
+      "get": {
+        "tags": ["Credit Notes"],
+        "summary": "Get a credit note",
+        "description": "Retrieves a single credit note by ID.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "example": "cn_abc123" },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Credit note details",
+            "content": {
+              "application/json": { "schema": { "nullable": true } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/customers": {
+      "post": {
+        "tags": ["Customers"],
+        "summary": "Create a customer",
+        "description": "Creates a new customer record linked to an environment.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "environmentId": { "type": "string" },
+                  "userId": { "type": "string" },
+                  "providerId": { "type": "string" },
+                  "externalId": { "type": "string" },
+                  "email": { "type": "string", "format": "email" },
+                  "name": { "type": "string", "minLength": 1 },
+                  "phone": { "type": "string" }
+                },
+                "required": [
+                  "environmentId",
+                  "userId",
+                  "providerId",
+                  "externalId",
+                  "email",
+                  "name"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Customer created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": { "type": "string" },
+                    "success": { "type": "boolean" }
+                  },
+                  "required": ["id", "success"]
+                }
+              }
+            }
+          },
+          "400": { "description": "Validation error" }
+        }
+      },
+      "get": {
+        "tags": ["Customers"],
+        "summary": "List customers",
+        "description": "Retrieves all customers for a given environment.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "example": "env_abc123" },
+            "required": true,
+            "name": "environmentId",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of customers",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "nullable": true } }
+              }
+            }
+          },
+          "400": { "description": "Missing environmentId" }
+        }
+      }
+    },
+    "/v1/customers/bulk": {
+      "post": {
+        "tags": ["Customers"],
+        "summary": "Bulk create customers",
+        "description": "Creates multiple customer records in a single request.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "customers": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "environmentId": { "type": "string", "minLength": 1 },
+                        "userId": { "type": "string", "minLength": 1 },
+                        "providerId": { "type": "string", "minLength": 1 },
+                        "externalId": { "type": "string", "minLength": 1 },
+                        "email": { "type": "string", "format": "email" },
+                        "name": { "type": "string", "minLength": 1 },
+                        "phone": { "type": "string" },
+                        "metadata": {
+                          "type": "object",
+                          "additionalProperties": { "nullable": true }
+                        }
+                      },
+                      "required": [
+                        "environmentId",
+                        "userId",
+                        "providerId",
+                        "externalId",
+                        "email",
+                        "name"
+                      ]
+                    },
+                    "minItems": 1
+                  }
+                },
+                "required": ["customers"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Customers created",
+            "content": {
+              "application/json": { "schema": { "nullable": true } }
+            }
+          },
+          "400": { "description": "Validation error" }
+        }
+      }
+    },
+    "/v1/customers/{id}": {
+      "delete": {
+        "tags": ["Customers"],
+        "summary": "Delete a customer",
+        "description": "Permanently deletes a customer by their ID.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "example": "cust_abc123" },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Customer deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "message": { "type": "string" }
+                  },
+                  "required": ["success", "message"]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/entitlements": {
+      "get": {
+        "tags": ["Entitlements"],
+        "summary": "List entitlements",
+        "description": "Retrieves all entitlements for a given environment.",
+        "parameters": [
+          {
+            "schema": { "type": "number" },
+            "required": false,
+            "name": "limit",
+            "in": "query"
+          },
+          {
+            "schema": { "type": "number" },
+            "required": false,
+            "name": "offset",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of entitlements",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "nullable": true } }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Entitlements"],
+        "summary": "Create an entitlement",
+        "description": "Creates a new entitlement definition (feature flag, usage limit, etc.).",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string", "minLength": 1 },
+                  "featureId": { "type": "string", "minLength": 1 },
+                  "type": { "type": "string", "enum": ["boolean", "metered"] },
+                  "limit": { "type": "integer" }
+                },
+                "required": ["name", "featureId", "type"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Entitlement created",
+            "content": {
+              "application/json": { "schema": { "nullable": true } }
+            }
+          },
+          "400": { "description": "Validation error" }
+        }
+      }
+    },
+    "/v1/entitlements/{id}": {
+      "delete": {
+        "tags": ["Entitlements"],
+        "summary": "Delete an entitlement",
+        "description": "Permanently removes an entitlement definition.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "example": "ent_abc123" },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Entitlement deleted",
+            "content": {
+              "application/json": { "schema": { "nullable": true } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/environments": {
+      "post": {
+        "tags": ["Environments"],
+        "summary": "Create an environment",
+        "description": "Creates a new isolated environment (e.g. sandbox, production).",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string", "minLength": 1 },
+                  "projectId": { "type": "string", "minLength": 1 }
+                },
+                "required": ["name", "projectId"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Environment created",
+            "content": {
+              "application/json": { "schema": { "nullable": true } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/environments/{id}": {
+      "get": {
+        "tags": ["Environments"],
+        "summary": "Get an environment",
+        "description": "Retrieves a specific environment by ID.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "example": "env_abc123" },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Environment details",
+            "content": {
+              "application/json": { "schema": { "nullable": true } }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": ["Environments"],
+        "summary": "Update an environment",
+        "description": "Updates the name of an existing environment.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "example": "env_abc123" },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": { "name": { "type": "string", "minLength": 1 } },
+                "required": ["name"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Environment updated",
+            "content": {
+              "application/json": { "schema": { "nullable": true } }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Environments"],
+        "summary": "Delete an environment",
+        "description": "Permanently deletes an environment and all associated data.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "example": "env_abc123" },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Environment deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "message": { "type": "string" }
+                  },
+                  "required": ["success", "message"]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/integrations": {
+      "post": {
+        "tags": ["Integrations"],
+        "summary": "Install an integration",
+        "description": "Installs and configures a new payment provider integration (Stripe, Polar, etc.).",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "providerId": { "type": "string" },
+                  "config": {
+                    "type": "object",
+                    "additionalProperties": { "nullable": true }
+                  }
+                },
+                "required": ["providerId", "config"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Integration installed",
+            "content": {
+              "application/json": { "schema": { "nullable": true } }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": ["Integrations"],
+        "summary": "List integrations",
+        "description": "Retrieves all installed integrations for an environment.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "enum": ["installed", "uninstalled", "error"]
+            },
+            "required": false,
+            "name": "status",
+            "in": "query"
+          },
+          {
+            "schema": { "type": "string" },
+            "required": false,
+            "name": "providerId",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of integrations",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "nullable": true } }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/integrations/{id}": {
+      "get": {
+        "tags": ["Integrations"],
+        "summary": "Get an integration",
+        "description": "Retrieves details of a specific integration.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "example": "int_abc123" },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Integration details",
+            "content": {
+              "application/json": { "schema": { "nullable": true } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/integrations/{id}/config": {
+      "patch": {
+        "tags": ["Integrations"],
+        "summary": "Update integration config",
+        "description": "Updates the configuration of an installed integration.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "example": "int_abc123" },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "config": {
+                    "type": "object",
+                    "additionalProperties": { "nullable": true }
+                  }
+                },
+                "required": ["config"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Config updated",
+            "content": {
+              "application/json": { "schema": { "nullable": true } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/invoices": {
+      "post": {
+        "tags": ["Invoices"],
+        "summary": "Create a draft invoice",
+        "description": "Creates a new invoice in draft status for a customer.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "customerId": { "type": "string", "minLength": 1 },
+                  "currency": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 3,
+                    "default": "USD"
+                  },
+                  "dueDate": { "type": "string", "format": "date-time" },
+                  "idempotencyKey": { "type": "string" }
+                },
+                "required": ["customerId"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Draft invoice created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": { "type": "string" },
+                    "success": { "type": "boolean" }
+                  },
+                  "required": ["id", "success"]
+                }
+              }
+            }
+          },
+          "400": { "description": "Validation error" }
+        }
+      },
+      "get": {
+        "tags": ["Invoices"],
+        "summary": "List invoices",
+        "description": "Retrieves invoices, optionally filtered by customer.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "example": "cust_abc123" },
+            "required": false,
+            "name": "customerId",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of invoices",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "nullable": true } }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/invoices/{id}": {
+      "get": {
+        "tags": ["Invoices"],
+        "summary": "Get an invoice",
+        "description": "Retrieves a single invoice by ID with all line items.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "example": "inv_abc123" },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Invoice details",
+            "content": {
+              "application/json": { "schema": { "nullable": true } }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": ["Invoices"],
+        "summary": "Update an invoice",
+        "description": "Updates mutable fields of a draft invoice.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "example": "inv_abc123" },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "dueDate": { "type": "string", "format": "date-time" },
+                  "status": {
+                    "type": "string",
+                    "enum": ["draft", "open", "paid", "void", "uncollectible"]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Invoice updated",
+            "content": {
+              "application/json": { "schema": { "nullable": true } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/invoices/{id}/finalize": {
+      "post": {
+        "tags": ["Invoices"],
+        "summary": "Finalize an invoice",
+        "description": "Transitions a draft invoice to finalized status, making it immutable.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "example": "inv_abc123" },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Invoice finalized",
+            "content": {
+              "application/json": { "schema": { "nullable": true } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/invoices/{id}/void": {
+      "post": {
+        "tags": ["Invoices"],
+        "summary": "Void an invoice",
+        "description": "Marks a finalized invoice as void, reversing its financial impact.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "example": "inv_abc123" },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Invoice voided",
+            "content": {
+              "application/json": { "schema": { "nullable": true } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/invoices/{id}/lines": {
+      "post": {
+        "tags": ["Invoices"],
+        "summary": "Add a line item",
+        "description": "Adds a new line item to a draft invoice.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "example": "inv_abc123" },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string", "minLength": 1 },
+                  "periodStart": { "type": "string", "format": "date-time" },
+                  "periodEnd": { "type": "string", "format": "date-time" },
+                  "amount": { "type": "integer" },
+                  "currency": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 3
+                  },
+                  "quantity": { "type": "integer", "minimum": 1, "default": 1 }
+                },
+                "required": [
+                  "name",
+                  "periodStart",
+                  "periodEnd",
+                  "amount",
+                  "currency"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Line item added",
+            "content": {
+              "application/json": { "schema": { "nullable": true } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/invoices/{id}/lines/{lineId}": {
+      "patch": {
+        "tags": ["Invoices"],
+        "summary": "Update a line item",
+        "description": "Updates an existing line item on a draft invoice.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "example": "inv_abc123" },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          },
+          {
+            "schema": { "type": "string", "example": "li_abc123" },
+            "required": true,
+            "name": "lineId",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "periodStart": { "type": "string", "format": "date-time" },
+                  "periodEnd": { "type": "string", "format": "date-time" },
+                  "amount": { "type": "integer" },
+                  "quantity": { "type": "integer", "minimum": 1 }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Line item updated",
+            "content": {
+              "application/json": { "schema": { "nullable": true } }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Invoices"],
+        "summary": "Delete a line item",
+        "description": "Removes a line item from a draft invoice.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "example": "inv_abc123" },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          },
+          {
+            "schema": { "type": "string", "example": "li_abc123" },
+            "required": true,
+            "name": "lineId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Line item deleted",
+            "content": {
+              "application/json": { "schema": { "nullable": true } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/payments": {
+      "post": {
+        "tags": ["Payments"],
+        "summary": "Process a payment",
+        "description": "Processes a payment against an invoice. Supports idempotency keys to prevent duplicate charges.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "invoiceId": { "type": "string", "minLength": 1 },
+                  "amount": {
+                    "type": "number",
+                    "minimum": 0,
+                    "exclusiveMinimum": true
+                  },
+                  "method": { "type": "string", "minLength": 1 },
+                  "idempotencyKey": { "type": "string" }
+                },
+                "required": ["invoiceId", "amount", "method"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Payment processed",
+            "content": {
+              "application/json": { "schema": { "nullable": true } }
+            }
+          },
+          "400": { "description": "Validation error" },
+          "409": { "description": "Idempotency conflict" }
+        }
+      },
+      "get": {
+        "tags": ["Payments"],
+        "summary": "List payments",
+        "description": "Retrieves all payments, optionally filtered by invoice or customer.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "example": "inv_abc123" },
+            "required": false,
+            "name": "invoiceId",
+            "in": "query"
+          },
+          {
+            "schema": { "type": "string", "example": "cust_abc123" },
+            "required": false,
+            "name": "customerId",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of payments",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "nullable": true } }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/payments/{id}": {
+      "get": {
+        "tags": ["Payments"],
+        "summary": "Get a payment",
+        "description": "Retrieves a single payment by ID.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "example": "pay_abc123" },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Payment details",
+            "content": {
+              "application/json": { "schema": { "nullable": true } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/plan-entitlements/{planId}": {
+      "post": {
+        "tags": ["Plan Entitlements"],
+        "summary": "Attach an entitlement to a plan",
+        "description": "Links an entitlement definition to a plan with optional limits.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "example": "plan_abc123" },
+            "required": true,
+            "name": "planId",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "entitlementId": { "type": "string", "minLength": 1 },
+                  "limit": { "type": "integer", "minimum": 0 }
+                },
+                "required": ["entitlementId"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Plan entitlement created",
+            "content": {
+              "application/json": { "schema": { "nullable": true } }
+            }
+          },
+          "400": { "description": "Validation error" }
+        }
+      }
+    },
+    "/v1/plan-entitlements": {
+      "get": {
+        "tags": ["Plan Entitlements"],
+        "summary": "List plan entitlements",
+        "description": "Retrieves all entitlements linked to plans, optionally filtered by planId.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "minLength": 1 },
+            "required": true,
+            "name": "planId",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of plan entitlements",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "nullable": true } }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/plan-entitlements/{planId}/{entitlementId}": {
+      "get": {
+        "tags": ["Plan Entitlements"],
+        "summary": "Get a plan entitlement",
+        "description": "Retrieves a specific plan-entitlement association by composite key.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "example": "plan_abc123" },
+            "required": true,
+            "name": "planId",
+            "in": "path"
+          },
+          {
+            "schema": { "type": "string", "example": "ent_abc123" },
+            "required": true,
+            "name": "entitlementId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Plan entitlement details",
+            "content": {
+              "application/json": { "schema": { "nullable": true } }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": ["Plan Entitlements"],
+        "summary": "Update plan entitlement limits",
+        "description": "Updates the limit values for a plan-entitlement association.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "example": "plan_abc123" },
+            "required": true,
+            "name": "planId",
+            "in": "path"
+          },
+          {
+            "schema": { "type": "string", "example": "ent_abc123" },
+            "required": true,
+            "name": "entitlementId",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": { "limit": { "type": "integer", "minimum": 0 } }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Plan entitlement limits updated",
+            "content": {
+              "application/json": { "schema": { "nullable": true } }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Plan Entitlements"],
+        "summary": "Detach an entitlement from a plan",
+        "description": "Removes a plan-entitlement association.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "example": "plan_abc123" },
+            "required": true,
+            "name": "planId",
+            "in": "path"
+          },
+          {
+            "schema": { "type": "string", "example": "ent_abc123" },
+            "required": true,
+            "name": "entitlementId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Plan entitlement removed",
+            "content": {
+              "application/json": { "schema": { "nullable": true } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/plans": {
+      "post": {
+        "tags": ["Plans"],
+        "summary": "Create a plan",
+        "description": "Creates a new billing plan with pricing and entitlement associations.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string", "minLength": 1 },
+                  "description": { "type": "string" },
+                  "currency": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 3
+                  }
+                },
+                "required": ["name"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Plan created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": { "type": "string" },
+                    "success": { "type": "boolean" }
+                  },
+                  "required": ["id", "success"]
+                }
+              }
+            }
+          },
+          "400": { "description": "Validation error" }
+        }
+      },
+      "get": {
+        "tags": ["Plans"],
+        "summary": "List plans",
+        "description": "Retrieves all available billing plans.",
+        "responses": {
+          "200": {
+            "description": "List of plans",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "nullable": true } }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/plans/{id}/archive": {
+      "patch": {
+        "tags": ["Plans"],
+        "summary": "Archive a plan",
+        "description": "Marks a plan as archived, preventing new subscriptions.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "example": "plan_abc123" },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Plan archived",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "message": { "type": "string" }
+                  },
+                  "required": ["success", "message"]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/plans/{id}/hide": {
+      "patch": {
+        "tags": ["Plans"],
+        "summary": "Hide a plan",
+        "description": "Hides a plan from public visibility while keeping it active for existing subscribers.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "example": "plan_abc123" },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Plan hidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "message": { "type": "string" }
+                  },
+                  "required": ["success", "message"]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/prices": {
+      "post": {
+        "tags": ["Prices"],
+        "summary": "Create a price",
+        "description": "Creates a new price linked to a plan or addon.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "environmentId": { "type": "string", "minLength": 1 },
+                  "name": { "type": "string", "minLength": 1 },
+                  "amount": { "type": "integer", "minimum": 0 },
+                  "currency": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 3
+                  },
+                  "interval": {
+                    "type": "string",
+                    "enum": ["month", "year", "week", "day"]
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": ["recurring", "one_time"]
+                  },
+                  "planId": { "type": "string" },
+                  "addonId": { "type": "string" },
+                  "metadata": {
+                    "type": "object",
+                    "additionalProperties": { "nullable": true }
+                  }
+                },
+                "required": [
+                  "environmentId",
+                  "name",
+                  "amount",
+                  "currency",
+                  "type"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Price created",
+            "content": {
+              "application/json": { "schema": { "nullable": true } }
+            }
+          },
+          "400": { "description": "Validation error" }
+        }
+      },
+      "get": {
+        "tags": ["Prices"],
+        "summary": "List prices",
+        "description": "Retrieves prices with optional filtering by plan, environment, or archive status.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "minLength": 1 },
+            "required": true,
+            "name": "environmentId",
+            "in": "query"
+          },
+          {
+            "schema": { "type": "string" },
+            "required": false,
+            "name": "planId",
+            "in": "query"
+          },
+          {
+            "schema": { "type": "string" },
+            "required": false,
+            "name": "addonId",
+            "in": "query"
+          },
+          {
+            "schema": { "type": "string", "enum": ["true", "false"] },
+            "required": false,
+            "name": "isArchived",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of prices",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "nullable": true } }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/prices/{id}": {
+      "patch": {
+        "tags": ["Prices"],
+        "summary": "Update a price",
+        "description": "Updates mutable fields of an existing price (name, metadata).",
+        "parameters": [
+          {
+            "schema": { "type": "string", "example": "price_abc123" },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "metadata": {
+                    "type": "object",
+                    "additionalProperties": { "nullable": true }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Price updated",
+            "content": {
+              "application/json": { "schema": { "nullable": true } }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": ["Prices"],
+        "summary": "Get a price",
+        "description": "Retrieves a single price by ID.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "example": "price_abc123" },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Price details",
+            "content": {
+              "application/json": { "schema": { "nullable": true } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/prices/{id}/version": {
+      "post": {
+        "tags": ["Prices"],
+        "summary": "Create a new price version",
+        "description": "Archives the current price and creates a new version with updated amount.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "example": "price_abc123" },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "amount": { "type": "integer", "minimum": 0 },
+                  "currency": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 3
+                  }
+                },
+                "required": ["amount"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "New price version created",
+            "content": {
+              "application/json": { "schema": { "nullable": true } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/provider-events": {
+      "post": {
+        "tags": ["Provider Events"],
+        "summary": "Ingest a provider event",
+        "description": "Receives a raw webhook event from a payment provider for async processing.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "providerId": { "type": "string" },
+                  "externalEventId": { "type": "string" },
+                  "eventType": { "type": "string" },
+                  "payload": {
+                    "type": "object",
+                    "additionalProperties": { "nullable": true }
+                  }
+                },
+                "required": [
+                  "providerId",
+                  "externalEventId",
+                  "eventType",
+                  "payload"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Event ingested",
+            "content": {
+              "application/json": { "schema": { "nullable": true } }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": ["Provider Events"],
+        "summary": "List provider events",
+        "description": "Retrieves ingested provider events with optional filtering.",
+        "parameters": [
+          {
+            "schema": { "type": "string" },
+            "required": false,
+            "name": "providerId",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": ["pending", "processed", "failed"]
+            },
+            "required": false,
+            "name": "status",
+            "in": "query"
+          },
+          {
+            "schema": { "type": "string" },
+            "required": false,
+            "name": "eventType",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of events",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "nullable": true } }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/provider-events/{id}": {
+      "get": {
+        "tags": ["Provider Events"],
+        "summary": "Get a provider event",
+        "description": "Retrieves a single provider event by ID.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "example": "pevt_abc123" },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Event details",
+            "content": {
+              "application/json": { "schema": { "nullable": true } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/refunds/payment/{paymentId}": {
+      "post": {
+        "tags": ["Refunds"],
+        "summary": "Create a refund",
+        "description": "Creates a refund for a previously processed payment. Supports idempotency keys.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "example": "pay_abc123" },
+            "required": true,
+            "name": "paymentId",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "amount": {
+                    "type": "number",
+                    "minimum": 0,
+                    "exclusiveMinimum": true
+                  },
+                  "reason": { "type": "string" },
+                  "idempotencyKey": { "type": "string" }
+                },
+                "required": ["amount"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Refund created",
+            "content": {
+              "application/json": { "schema": { "nullable": true } }
+            }
+          },
+          "400": { "description": "Validation error" },
+          "409": { "description": "Idempotency conflict" }
+        }
+      }
+    },
+    "/v1/refunds/{id}": {
+      "patch": {
+        "tags": ["Refunds"],
+        "summary": "Update a refund",
+        "description": "Updates metadata or status of an existing refund.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "example": "ref_abc123" },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "enum": ["pending", "succeeded", "failed"]
+                  }
+                },
+                "required": ["status"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Refund updated",
+            "content": {
+              "application/json": { "schema": { "nullable": true } }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": ["Refunds"],
+        "summary": "Get a refund",
+        "description": "Retrieves a single refund by ID.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "example": "ref_abc123" },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Refund details",
+            "content": {
+              "application/json": { "schema": { "nullable": true } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/refunds": {
+      "get": {
+        "tags": ["Refunds"],
+        "summary": "List refunds",
+        "description": "Retrieves all refunds, optionally filtered by payment or customer.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "example": "pay_abc123" },
+            "required": false,
+            "name": "paymentId",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of refunds",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "nullable": true } }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/studio": {
+      "post": {
+        "tags": ["Studio"],
+        "summary": "Create a studio admin",
+        "description": "Creates a new admin user for the Revstack Studio dashboard.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "string", "format": "email" },
+                  "passwordHash": { "type": "string", "minLength": 1 },
+                  "name": { "type": "string" },
+                  "isSuperadmin": { "type": "boolean", "default": false }
+                },
+                "required": ["email", "passwordHash"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Admin created",
+            "content": {
+              "application/json": { "schema": { "nullable": true } }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": ["Studio"],
+        "summary": "List studio admins",
+        "description": "Retrieves all studio admin users.",
+        "responses": {
+          "200": {
+            "description": "List of admins",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "nullable": true } }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/studio/{idOrEmail}": {
+      "get": {
+        "tags": ["Studio"],
+        "summary": "Get a studio admin",
+        "description": "Retrieves a studio admin by ID or email address.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "example": "admin_abc123" },
+            "required": true,
+            "name": "idOrEmail",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Admin details",
+            "content": {
+              "application/json": { "schema": { "nullable": true } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/studio/{id}": {
+      "patch": {
+        "tags": ["Studio"],
+        "summary": "Update a studio admin",
+        "description": "Updates name or password of an existing studio admin.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "example": "admin_abc123" },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "passwordHash": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Admin updated",
+            "content": {
+              "application/json": { "schema": { "nullable": true } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/subscriptions": {
+      "post": {
+        "tags": ["Subscriptions"],
+        "summary": "Create a subscription",
+        "description": "Creates a new subscription linking a customer to a plan and price.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "customerId": { "type": "string", "minLength": 1 },
+                  "planId": { "type": "string", "minLength": 1 },
+                  "priceId": { "type": "string", "minLength": 1 },
+                  "couponId": { "type": "string" }
+                },
+                "required": ["customerId", "planId", "priceId"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Subscription created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": { "type": "string" },
+                    "success": { "type": "boolean" }
+                  },
+                  "required": ["id", "success"]
+                }
+              }
+            }
+          },
+          "400": { "description": "Validation error" },
+          "409": { "description": "Duplicate subscription conflict" }
+        }
+      },
+      "get": {
+        "tags": ["Subscriptions"],
+        "summary": "List subscriptions",
+        "description": "Retrieves subscriptions with optional filtering.",
+        "parameters": [
+          {
+            "schema": { "type": "string" },
+            "required": false,
+            "name": "customerId",
+            "in": "query"
+          },
+          {
+            "schema": { "type": "string" },
+            "required": false,
+            "name": "planId",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": ["active", "canceled", "past_due", "paused"]
+            },
+            "required": false,
+            "name": "status",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of subscriptions",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "nullable": true } }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/subscriptions/customer/{customerId}": {
+      "get": {
+        "tags": ["Subscriptions"],
+        "summary": "List customer subscriptions",
+        "description": "Retrieves all subscriptions for a specific customer.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "example": "cust_abc123" },
+            "required": true,
+            "name": "customerId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Customer subscriptions",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "nullable": true } }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/subscriptions/{id}": {
+      "get": {
+        "tags": ["Subscriptions"],
+        "summary": "Get a subscription",
+        "description": "Retrieves a single subscription by ID.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "example": "sub_abc123" },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Subscription details",
+            "content": {
+              "application/json": { "schema": { "nullable": true } }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": ["Subscriptions"],
+        "summary": "Update a subscription",
+        "description": "Updates mutable fields of an existing subscription.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "example": "sub_abc123" },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "planId": { "type": "string" },
+                  "priceId": { "type": "string" },
+                  "couponId": { "type": "string", "nullable": true },
+                  "isAutoRenew": { "type": "boolean" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Subscription updated",
+            "content": {
+              "application/json": { "schema": { "nullable": true } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/subscriptions/{id}/cancel": {
+      "post": {
+        "tags": ["Subscriptions"],
+        "summary": "Cancel a subscription",
+        "description": "Cancels an active subscription, optionally at end of billing period.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "example": "sub_abc123" },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Subscription cancelled",
+            "content": {
+              "application/json": { "schema": { "nullable": true } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/system/api-keys": {
+      "post": {
+        "tags": ["API Keys"],
+        "summary": "Create an API key",
+        "description": "Generates a new API key for programmatic access. The plain-text key is only returned once.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "environmentId": { "type": "string", "minLength": 1 },
+                  "name": { "type": "string", "minLength": 1 },
+                  "type": { "type": "string", "enum": ["public", "secret"] },
+                  "scopes": {
+                    "type": "array",
+                    "items": { "type": "string" },
+                    "default": []
+                  }
+                },
+                "required": ["environmentId", "name", "type"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "API key created",
+            "content": {
+              "application/json": { "schema": { "nullable": true } }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": ["API Keys"],
+        "summary": "List API keys",
+        "description": "Retrieves all API keys for an environment (without plain-text values).",
+        "parameters": [
+          {
+            "schema": { "type": "string", "minLength": 1 },
+            "required": true,
+            "name": "environmentId",
+            "in": "query"
+          },
+          {
+            "schema": { "type": "string", "enum": ["public", "secret"] },
+            "required": false,
+            "name": "type",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of API keys",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "nullable": true } }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/system/api-keys/{key}": {
+      "get": {
+        "tags": ["API Keys"],
+        "summary": "Get an API key",
+        "description": "Retrieves metadata for a specific API key.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "example": "sk_live_abc123" },
+            "required": true,
+            "name": "key",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "API key details",
+            "content": {
+              "application/json": { "schema": { "nullable": true } }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": ["API Keys"],
+        "summary": "Update an API key",
+        "description": "Updates the name or scopes of an existing API key.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "example": "sk_live_abc123" },
+            "required": true,
+            "name": "key",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "scopes": { "type": "array", "items": { "type": "string" } }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "API key updated",
+            "content": {
+              "application/json": { "schema": { "nullable": true } }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["API Keys"],
+        "summary": "Delete an API key",
+        "description": "Permanently deletes an API key.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "example": "sk_live_abc123" },
+            "required": true,
+            "name": "key",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "API key deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "message": { "type": "string" }
+                  },
+                  "required": ["success", "message"]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/system/api-keys/{key}/rotate": {
+      "post": {
+        "tags": ["API Keys"],
+        "summary": "Rotate an API key",
+        "description": "Generates a new key value and archives the old one.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "example": "sk_live_abc123" },
+            "required": true,
+            "name": "key",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "New key generated",
+            "content": {
+              "application/json": { "schema": { "nullable": true } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/system/verify": {
+      "get": {
+        "tags": ["API Keys"],
+        "summary": "Verify an API key",
+        "description": "Validates a Bearer token from the Authorization header and returns key metadata.",
+        "responses": {
+          "200": {
+            "description": "Verification result",
+            "content": {
+              "application/json": { "schema": { "nullable": true } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/usage/record": {
+      "post": {
+        "tags": ["Usage"],
+        "summary": "Record usage event",
+        "description": "Records a metered usage event for a customer against a feature entitlement.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "customerId": { "type": "string", "minLength": 1 },
+                  "featureId": { "type": "string", "minLength": 1 },
+                  "amount": {
+                    "type": "number",
+                    "minimum": 0,
+                    "exclusiveMinimum": true
+                  }
+                },
+                "required": ["customerId", "featureId", "amount"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Usage recorded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": { "type": "string" },
+                    "success": { "type": "boolean" }
+                  },
+                  "required": ["id", "success"]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/usage/meters/{customerId}/{featureId}": {
+      "get": {
+        "tags": ["Usage"],
+        "summary": "Get a usage meter",
+        "description": "Retrieves the current usage meter for a customer-feature pair.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "example": "cust_abc123" },
+            "required": true,
+            "name": "customerId",
+            "in": "path"
+          },
+          {
+            "schema": { "type": "string", "example": "feat_api_calls" },
+            "required": true,
+            "name": "featureId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Usage meter",
+            "content": {
+              "application/json": { "schema": { "nullable": true } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/usage": {
+      "get": {
+        "tags": ["Usage"],
+        "summary": "List usage records",
+        "description": "Retrieves usage records with optional filtering.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "minLength": 1 },
+            "required": true,
+            "name": "customerId",
+            "in": "query"
+          },
+          {
+            "schema": { "type": "string" },
+            "required": false,
+            "name": "featureId",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of usage records",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "nullable": true } }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/usage/meters": {
+      "post": {
+        "tags": ["Usage"],
+        "summary": "Create a usage meter",
+        "description": "Creates a new usage meter definition for tracking feature consumption.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "customerId": { "type": "string", "minLength": 1 },
+                  "featureId": { "type": "string", "minLength": 1 },
+                  "periodStart": { "type": "string", "format": "date-time" },
+                  "periodEnd": { "type": "string", "format": "date-time" }
+                },
+                "required": [
+                  "customerId",
+                  "featureId",
+                  "periodStart",
+                  "periodEnd"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Usage meter created",
+            "content": {
+              "application/json": { "schema": { "nullable": true } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/usage/meters/{id}": {
+      "patch": {
+        "tags": ["Usage"],
+        "summary": "Update a usage meter",
+        "description": "Updates configuration of an existing usage meter.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "example": "meter_abc123" },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "periodStart": { "type": "string", "format": "date-time" },
+                  "periodEnd": { "type": "string", "format": "date-time" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Usage meter updated",
+            "content": {
+              "application/json": { "schema": { "nullable": true } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/users": {
+      "post": {
+        "tags": ["Users"],
+        "summary": "Create a user",
+        "description": "Creates a new end-user within an environment.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "environmentId": { "type": "string", "minLength": 1 },
+                  "email": { "type": "string", "format": "email" },
+                  "name": { "type": "string" },
+                  "role": { "type": "string", "minLength": 1 },
+                  "metadata": {
+                    "type": "object",
+                    "additionalProperties": { "nullable": true }
+                  }
+                },
+                "required": ["environmentId", "email", "role"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User created",
+            "content": {
+              "application/json": { "schema": { "nullable": true } }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": ["Users"],
+        "summary": "List users",
+        "description": "Retrieves users with optional filtering by environment, role, and status.",
+        "parameters": [
+          {
+            "schema": { "type": "string" },
+            "required": false,
+            "name": "environmentId",
+            "in": "query"
+          },
+          {
+            "schema": { "type": "string" },
+            "required": false,
+            "name": "role",
+            "in": "query"
+          },
+          {
+            "schema": { "type": "string", "enum": ["true", "false"] },
+            "required": false,
+            "name": "isActive",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of users",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "nullable": true } }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/users/{id}": {
+      "get": {
+        "tags": ["Users"],
+        "summary": "Get a user",
+        "description": "Retrieves a single user by ID.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "example": "usr_abc123" },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User details",
+            "content": {
+              "application/json": { "schema": { "nullable": true } }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": ["Users"],
+        "summary": "Update a user",
+        "description": "Updates profile information for an existing user.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "example": "usr_abc123" },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "role": { "type": "string" },
+                  "isActive": { "type": "boolean" },
+                  "metadata": {
+                    "type": "object",
+                    "additionalProperties": { "nullable": true }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User updated",
+            "content": {
+              "application/json": { "schema": { "nullable": true } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/wallets/{walletId}/credit": {
+      "post": {
+        "tags": ["Wallets"],
+        "summary": "Credit a wallet",
+        "description": "Adds funds to a customer wallet. Creates an ACID-compliant transaction record.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "example": "wal_abc123" },
+            "required": true,
+            "name": "walletId",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "amount": {
+                    "type": "number",
+                    "minimum": 0,
+                    "exclusiveMinimum": true
+                  },
+                  "referenceId": { "type": "string" }
+                },
+                "required": ["amount"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Wallet credited",
+            "content": {
+              "application/json": { "schema": { "nullable": true } }
+            }
+          },
+          "400": { "description": "Validation error" }
+        }
+      }
+    },
+    "/v1/wallets/{walletId}/debit": {
+      "post": {
+        "tags": ["Wallets"],
+        "summary": "Debit a wallet",
+        "description": "Withdraws funds from a customer wallet. Fails if insufficient balance.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "example": "wal_abc123" },
+            "required": true,
+            "name": "walletId",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "amount": {
+                    "type": "number",
+                    "minimum": 0,
+                    "exclusiveMinimum": true
+                  },
+                  "referenceId": { "type": "string" }
+                },
+                "required": ["amount"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Wallet debited",
+            "content": {
+              "application/json": { "schema": { "nullable": true } }
+            }
+          },
+          "400": { "description": "Insufficient balance or validation error" }
+        }
+      }
+    },
+    "/v1/wallets/{customerId}/balance": {
+      "get": {
+        "tags": ["Wallets"],
+        "summary": "Get wallet balance",
+        "description": "Retrieves the current balance of a customer wallet.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "example": "cust_abc123" },
+            "required": true,
+            "name": "customerId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Wallet balance",
+            "content": {
+              "application/json": { "schema": { "nullable": true } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/wallets/{walletId}/transactions": {
+      "get": {
+        "tags": ["Wallets"],
+        "summary": "List wallet transactions",
+        "description": "Retrieves the transaction history for a specific wallet.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "example": "wal_abc123" },
+            "required": true,
+            "name": "walletId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Transaction history",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "nullable": true } }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/webhooks/endpoints": {
+      "post": {
+        "tags": ["Webhooks"],
+        "summary": "Create a webhook endpoint",
+        "description": "Registers a new webhook endpoint URL to receive event notifications.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "url": { "type": "string", "format": "uri" },
+                  "events": {
+                    "type": "array",
+                    "items": { "type": "string" },
+                    "minItems": 1
+                  }
+                },
+                "required": ["url", "events"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Webhook endpoint created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": { "type": "string" },
+                    "success": { "type": "boolean" }
+                  },
+                  "required": ["id", "success"]
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": ["Webhooks"],
+        "summary": "List webhook endpoints",
+        "description": "Retrieves all registered webhook endpoints.",
+        "responses": {
+          "200": {
+            "description": "List of endpoints",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "nullable": true } }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/webhooks/{id}/deactivate": {
+      "post": {
+        "tags": ["Webhooks"],
+        "summary": "Deactivate a webhook endpoint",
+        "description": "Disables a webhook endpoint from receiving further notifications.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "example": "wh_abc123" },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Endpoint deactivated",
+            "content": {
+              "application/json": { "schema": { "nullable": true } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/webhooks/{id}/rotate": {
+      "post": {
+        "tags": ["Webhooks"],
+        "summary": "Rotate webhook secret",
+        "description": "Generates a new signing secret for a webhook endpoint.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "example": "wh_abc123" },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Secret rotated",
+            "content": {
+              "application/json": { "schema": { "nullable": true } }
+            }
+          }
+        }
+      }
+    },
+    "/v1/webhooks/{id}/deliveries": {
+      "get": {
+        "tags": ["Webhooks"],
+        "summary": "List webhook deliveries",
+        "description": "Retrieves the delivery log for a specific webhook endpoint.",
+        "parameters": [
+          {
+            "schema": { "type": "string", "example": "wh_abc123" },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Delivery logs",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "nullable": true } }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
