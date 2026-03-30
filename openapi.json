@@ -2,27 +2,32 @@
   "openapi": "3.0.0",
   "info": {
     "title": "Revstack API",
-    "version": "0.1.0",
+    "version": "1.0.0",
     "description": "Open Source Billing OS for Developers. The scalable, developer-first billing engine with subscriptions, invoicing, usage metering, and entitlements."
   },
   "servers": [
     {
-      "url": "https://revstack.dev",
-      "description": "Revstack API"
+      "url": "http://localhost:6900",
+      "description": "Revstack API (Local Development)"
     }
   ],
-  "components": { "schemas": {}, "parameters": {} },
+  "components": {
+    "schemas": {},
+    "parameters": {}
+  },
   "paths": {
-    "/v1/addon-entitlements/{addonId}": {
+    "/v1/addon-entitlements/{addon_id}": {
       "post": {
         "tags": ["Addon Entitlements"],
         "summary": "Attach an entitlement to an addon",
-        "description": "Links an entitlement definition to an addon.",
         "parameters": [
           {
-            "schema": { "type": "string", "example": "add_abc123" },
+            "schema": {
+              "type": "string",
+              "example": "add_abc123"
+            },
             "required": true,
-            "name": "addonId",
+            "name": "addon_id",
             "in": "path"
           }
         ],
@@ -32,13 +37,22 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "entitlementId": { "type": "string", "minLength": 1 },
+                  "addon_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "entitlement_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
                   "metadata": {
                     "type": "object",
-                    "additionalProperties": { "nullable": true }
+                    "additionalProperties": {
+                      "nullable": true
+                    }
                   }
                 },
-                "required": ["entitlementId"]
+                "required": ["addon_id", "entitlement_id"]
               }
             }
           }
@@ -47,10 +61,49 @@
           "201": {
             "description": "Addon entitlement created",
             "content": {
-              "application/json": { "schema": { "nullable": true } }
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "addon_id": {
+                      "type": "string"
+                    },
+                    "entitlement_id": {
+                      "type": "string"
+                    },
+                    "metadata": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "nullable": true
+                      }
+                    },
+                    "created_at": {
+                      "type": "string"
+                    },
+                    "updated_at": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "addon_id",
+                    "entitlement_id",
+                    "created_at",
+                    "updated_at"
+                  ]
+                }
+              }
             }
           },
-          "400": { "description": "Validation error" }
+          "400": {
+            "description": "Validation error"
+          },
+          "409": {
+            "description": "Already exists"
+          }
         }
       }
     },
@@ -58,12 +111,14 @@
       "get": {
         "tags": ["Addon Entitlements"],
         "summary": "List addon entitlements",
-        "description": "Retrieves all entitlements linked to addons, optionally filtered by addonId.",
         "parameters": [
           {
-            "schema": { "type": "string", "minLength": 1 },
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
             "required": true,
-            "name": "addonId",
+            "name": "addon_id",
             "in": "query"
           }
         ],
@@ -72,29 +127,69 @@
             "description": "List of addon entitlements",
             "content": {
               "application/json": {
-                "schema": { "type": "array", "items": { "nullable": true } }
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "addon_id": {
+                        "type": "string"
+                      },
+                      "entitlement_id": {
+                        "type": "string"
+                      },
+                      "metadata": {
+                        "type": "object",
+                        "additionalProperties": {
+                          "nullable": true
+                        }
+                      },
+                      "created_at": {
+                        "type": "string"
+                      },
+                      "updated_at": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "addon_id",
+                      "entitlement_id",
+                      "created_at",
+                      "updated_at"
+                    ]
+                  }
+                }
               }
             }
           }
         }
       }
     },
-    "/v1/addon-entitlements/{addonId}/{entitlementId}": {
+    "/v1/addon-entitlements/{addon_id}/{entitlement_id}": {
       "get": {
         "tags": ["Addon Entitlements"],
         "summary": "Get an addon entitlement",
-        "description": "Retrieves a specific addon-entitlement association by composite key.",
         "parameters": [
           {
-            "schema": { "type": "string", "example": "add_abc123" },
+            "schema": {
+              "type": "string",
+              "example": "add_abc123"
+            },
             "required": true,
-            "name": "addonId",
+            "name": "addon_id",
             "in": "path"
           },
           {
-            "schema": { "type": "string", "example": "ent_abc123" },
+            "schema": {
+              "type": "string",
+              "example": "ent_abc123"
+            },
             "required": true,
-            "name": "entitlementId",
+            "name": "entitlement_id",
             "in": "path"
           }
         ],
@@ -102,26 +197,38 @@
           "200": {
             "description": "Addon entitlement details",
             "content": {
-              "application/json": { "schema": { "nullable": true } }
+              "application/json": {
+                "schema": {
+                  "nullable": true
+                }
+              }
             }
+          },
+          "404": {
+            "description": "Not found"
           }
         }
       },
       "delete": {
         "tags": ["Addon Entitlements"],
         "summary": "Detach an entitlement from an addon",
-        "description": "Removes an addon-entitlement association.",
         "parameters": [
           {
-            "schema": { "type": "string", "example": "add_abc123" },
+            "schema": {
+              "type": "string",
+              "example": "add_abc123"
+            },
             "required": true,
-            "name": "addonId",
+            "name": "addon_id",
             "in": "path"
           },
           {
-            "schema": { "type": "string", "example": "ent_abc123" },
+            "schema": {
+              "type": "string",
+              "example": "ent_abc123"
+            },
             "required": true,
-            "name": "entitlementId",
+            "name": "entitlement_id",
             "in": "path"
           }
         ],
@@ -129,8 +236,21 @@
           "200": {
             "description": "Addon entitlement removed",
             "content": {
-              "application/json": { "schema": { "nullable": true } }
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": ["success"]
+                }
+              }
             }
+          },
+          "404": {
+            "description": "Not found"
           }
         }
       }
@@ -139,22 +259,32 @@
       "post": {
         "tags": ["Addons"],
         "summary": "Create an addon",
-        "description": "Creates a new purchasable addon that can be attached to subscriptions.",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
                 "properties": {
-                  "environmentId": { "type": "string", "minLength": 1 },
-                  "name": { "type": "string", "minLength": 1 },
-                  "type": { "type": "string", "enum": ["flat", "metered"] },
+                  "environment_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": ["flat", "metered"]
+                  },
                   "metadata": {
                     "type": "object",
-                    "additionalProperties": { "nullable": true }
+                    "additionalProperties": {
+                      "nullable": true
+                    }
                   }
                 },
-                "required": ["environmentId", "name", "type"]
+                "required": ["environment_id", "name", "type"]
               }
             }
           }
@@ -163,27 +293,38 @@
           "201": {
             "description": "Addon created",
             "content": {
-              "application/json": { "schema": { "nullable": true } }
+              "application/json": {
+                "schema": {
+                  "nullable": true
+                }
+              }
             }
           },
-          "400": { "description": "Validation error" }
+          "400": {
+            "description": "Validation error"
+          }
         }
       },
       "get": {
         "tags": ["Addons"],
         "summary": "List addons",
-        "description": "Retrieves addons with optional filtering.",
         "parameters": [
           {
-            "schema": { "type": "string", "minLength": 1 },
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
             "required": true,
-            "name": "environmentId",
+            "name": "environment_id",
             "in": "query"
           },
           {
-            "schema": { "type": "string", "enum": ["true", "false"] },
+            "schema": {
+              "type": "string",
+              "enum": ["true", "false"]
+            },
             "required": false,
-            "name": "isArchived",
+            "name": "is_archived",
             "in": "query"
           }
         ],
@@ -192,7 +333,12 @@
             "description": "List of addons",
             "content": {
               "application/json": {
-                "schema": { "type": "array", "items": { "nullable": true } }
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "nullable": true
+                  }
+                }
               }
             }
           }
@@ -203,35 +349,42 @@
       "post": {
         "tags": ["Addons"],
         "summary": "Bulk create addons",
-        "description": "Creates multiple addons in a single request.",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
                 "properties": {
+                  "environment_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
                   "addons": {
                     "type": "array",
                     "items": {
                       "type": "object",
                       "properties": {
-                        "environmentId": { "type": "string", "minLength": 1 },
-                        "name": { "type": "string", "minLength": 1 },
+                        "name": {
+                          "type": "string",
+                          "minLength": 1
+                        },
                         "type": {
                           "type": "string",
                           "enum": ["flat", "metered"]
                         },
                         "metadata": {
                           "type": "object",
-                          "additionalProperties": { "nullable": true }
+                          "additionalProperties": {
+                            "nullable": true
+                          }
                         }
                       },
-                      "required": ["environmentId", "name", "type"]
+                      "required": ["name", "type"]
                     },
                     "minItems": 1
                   }
                 },
-                "required": ["addons"]
+                "required": ["environment_id", "addons"]
               }
             }
           }
@@ -240,7 +393,11 @@
           "201": {
             "description": "Addons created",
             "content": {
-              "application/json": { "schema": { "nullable": true } }
+              "application/json": {
+                "schema": {
+                  "nullable": true
+                }
+              }
             }
           }
         }
@@ -250,10 +407,12 @@
       "patch": {
         "tags": ["Addons"],
         "summary": "Archive an addon",
-        "description": "Marks an addon as archived, preventing new purchases.",
         "parameters": [
           {
-            "schema": { "type": "string", "example": "add_abc123" },
+            "schema": {
+              "type": "string",
+              "example": "add_abc123"
+            },
             "required": true,
             "name": "id",
             "in": "path"
@@ -267,10 +426,11 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "success": { "type": "boolean" },
-                    "message": { "type": "string" }
+                    "success": {
+                      "type": "boolean"
+                    }
                   },
-                  "required": ["success", "message"]
+                  "required": ["success"]
                 }
               }
             }
@@ -282,10 +442,12 @@
       "get": {
         "tags": ["Addons"],
         "summary": "Get an addon",
-        "description": "Retrieves a single addon by ID.",
         "parameters": [
           {
-            "schema": { "type": "string", "example": "add_abc123" },
+            "schema": {
+              "type": "string",
+              "example": "add_abc123"
+            },
             "required": true,
             "name": "id",
             "in": "path"
@@ -295,8 +457,15 @@
           "200": {
             "description": "Addon details",
             "content": {
-              "application/json": { "schema": { "nullable": true } }
+              "application/json": {
+                "schema": {
+                  "nullable": true
+                }
+              }
             }
+          },
+          "404": {
+            "description": "Not found"
           }
         }
       }
@@ -308,25 +477,33 @@
         "description": "Retrieves audit log entries with optional filtering by actor, action, and resource.",
         "parameters": [
           {
-            "schema": { "type": "string" },
+            "schema": {
+              "type": "string"
+            },
             "required": false,
-            "name": "environmentId",
+            "name": "environment_id",
             "in": "query"
           },
           {
-            "schema": { "type": "string" },
+            "schema": {
+              "type": "string"
+            },
             "required": false,
-            "name": "actorId",
+            "name": "actor_id",
             "in": "query"
           },
           {
-            "schema": { "type": "string" },
+            "schema": {
+              "type": "string"
+            },
             "required": false,
             "name": "action",
             "in": "query"
           },
           {
-            "schema": { "type": "string" },
+            "schema": {
+              "type": "string"
+            },
             "required": false,
             "name": "resource",
             "in": "query"
@@ -337,7 +514,12 @@
             "description": "List of audit logs",
             "content": {
               "application/json": {
-                "schema": { "type": "array", "items": { "nullable": true } }
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "nullable": true
+                  }
+                }
               }
             }
           }
@@ -351,7 +533,10 @@
         "description": "Retrieves a single audit log entry by ID.",
         "parameters": [
           {
-            "schema": { "type": "string", "example": "alog_abc123" },
+            "schema": {
+              "type": "string",
+              "example": "alog_abc123"
+            },
             "required": true,
             "name": "id",
             "in": "path"
@@ -361,8 +546,15 @@
           "200": {
             "description": "Audit log details",
             "content": {
-              "application/json": { "schema": { "nullable": true } }
+              "application/json": {
+                "schema": {
+                  "nullable": true
+                }
+              }
             }
+          },
+          "404": {
+            "description": "Audit log not found"
           }
         }
       }
@@ -378,17 +570,35 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "environmentId": { "type": "string", "minLength": 1 },
+                  "environmentId": {
+                    "type": "string",
+                    "minLength": 1
+                  },
                   "provider": {
                     "type": "string",
                     "enum": ["clerk", "supabase", "firebase", "auth0", "custom"]
                   },
-                  "strategy": { "type": "string", "enum": ["jwt", "jwks"] },
-                  "jwksUri": { "type": "string", "format": "uri" },
-                  "signingSecret": { "type": "string" },
-                  "issuer": { "type": "string" },
-                  "audience": { "type": "string" },
-                  "userIdClaim": { "type": "string", "minLength": 1 }
+                  "strategy": {
+                    "type": "string",
+                    "enum": ["jwt", "jwks"]
+                  },
+                  "jwksUri": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "signingSecret": {
+                    "type": "string"
+                  },
+                  "issuer": {
+                    "type": "string"
+                  },
+                  "audience": {
+                    "type": "string"
+                  },
+                  "userIdClaim": {
+                    "type": "string",
+                    "minLength": 1
+                  }
                 },
                 "required": [
                   "environmentId",
@@ -404,7 +614,11 @@
           "200": {
             "description": "Auth config saved",
             "content": {
-              "application/json": { "schema": { "nullable": true } }
+              "application/json": {
+                "schema": {
+                  "nullable": true
+                }
+              }
             }
           }
         }
@@ -415,13 +629,19 @@
         "description": "Retrieves all authentication configurations for an environment.",
         "parameters": [
           {
-            "schema": { "type": "string", "minLength": 1 },
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
             "required": true,
             "name": "environmentId",
             "in": "query"
           },
           {
-            "schema": { "type": "string", "enum": ["active", "archived"] },
+            "schema": {
+              "type": "string",
+              "enum": ["active", "archived"]
+            },
             "required": false,
             "name": "status",
             "in": "query"
@@ -432,7 +652,12 @@
             "description": "List of auth configs",
             "content": {
               "application/json": {
-                "schema": { "type": "array", "items": { "nullable": true } }
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "nullable": true
+                  }
+                }
               }
             }
           }
@@ -446,7 +671,10 @@
         "description": "Retrieves a specific authentication configuration by ID.",
         "parameters": [
           {
-            "schema": { "type": "string", "example": "auth_abc123" },
+            "schema": {
+              "type": "string",
+              "example": "auth_abc123"
+            },
             "required": true,
             "name": "id",
             "in": "path"
@@ -456,7 +684,11 @@
           "200": {
             "description": "Auth config details",
             "content": {
-              "application/json": { "schema": { "nullable": true } }
+              "application/json": {
+                "schema": {
+                  "nullable": true
+                }
+              }
             }
           }
         }
@@ -473,16 +705,30 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "environmentId": { "type": "string", "minLength": 1 },
-                  "code": { "type": "string", "minLength": 1 },
-                  "type": { "type": "string", "enum": ["percent", "fixed"] },
-                  "amount": { "type": "number", "minimum": 0 },
+                  "environment_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "code": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": ["percent", "fixed"]
+                  },
+                  "amount": {
+                    "type": "number",
+                    "minimum": 0
+                  },
                   "metadata": {
                     "type": "object",
-                    "additionalProperties": { "nullable": true }
+                    "additionalProperties": {
+                      "nullable": true
+                    }
                   }
                 },
-                "required": ["environmentId", "code", "type", "amount"]
+                "required": ["environment_id", "code", "type", "amount"]
               }
             }
           }
@@ -491,10 +737,16 @@
           "201": {
             "description": "Coupon created",
             "content": {
-              "application/json": { "schema": { "nullable": true } }
+              "application/json": {
+                "schema": {
+                  "nullable": true
+                }
+              }
             }
           },
-          "400": { "description": "Validation error" }
+          "400": {
+            "description": "Validation error"
+          }
         }
       },
       "get": {
@@ -503,21 +755,30 @@
         "description": "Retrieves coupons with optional environment and status filters.",
         "parameters": [
           {
-            "schema": { "type": "string", "minLength": 1 },
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
             "required": true,
-            "name": "environmentId",
+            "name": "environment_id",
             "in": "query"
           },
           {
-            "schema": { "type": "string", "enum": ["true", "false"] },
+            "schema": {
+              "type": "string",
+              "enum": ["true", "false"]
+            },
             "required": false,
-            "name": "isActive",
+            "name": "is_active",
             "in": "query"
           },
           {
-            "schema": { "type": "string", "enum": ["true", "false"] },
+            "schema": {
+              "type": "string",
+              "enum": ["true", "false"]
+            },
             "required": false,
-            "name": "isArchived",
+            "name": "is_archived",
             "in": "query"
           }
         ],
@@ -526,7 +787,12 @@
             "description": "List of coupons",
             "content": {
               "application/json": {
-                "schema": { "type": "array", "items": { "nullable": true } }
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "nullable": true
+                  }
+                }
               }
             }
           }
@@ -540,7 +806,10 @@
         "description": "Updates the active status or metadata of a coupon.",
         "parameters": [
           {
-            "schema": { "type": "string", "example": "coup_abc123" },
+            "schema": {
+              "type": "string",
+              "example": "coup_abc123"
+            },
             "required": true,
             "name": "id",
             "in": "path"
@@ -552,10 +821,14 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "isActive": { "type": "boolean" },
+                  "is_active": {
+                    "type": "boolean"
+                  },
                   "metadata": {
                     "type": "object",
-                    "additionalProperties": { "nullable": true }
+                    "additionalProperties": {
+                      "nullable": true
+                    }
                   }
                 }
               }
@@ -566,7 +839,11 @@
           "200": {
             "description": "Coupon updated",
             "content": {
-              "application/json": { "schema": { "nullable": true } }
+              "application/json": {
+                "schema": {
+                  "nullable": true
+                }
+              }
             }
           }
         }
@@ -577,7 +854,10 @@
         "description": "Permanently deletes a coupon.",
         "parameters": [
           {
-            "schema": { "type": "string", "example": "coup_abc123" },
+            "schema": {
+              "type": "string",
+              "example": "coup_abc123"
+            },
             "required": true,
             "name": "id",
             "in": "path"
@@ -587,7 +867,11 @@
           "200": {
             "description": "Coupon deleted",
             "content": {
-              "application/json": { "schema": { "nullable": true } }
+              "application/json": {
+                "schema": {
+                  "nullable": true
+                }
+              }
             }
           }
         }
@@ -598,7 +882,10 @@
         "description": "Retrieves a single coupon by ID.",
         "parameters": [
           {
-            "schema": { "type": "string", "example": "coup_abc123" },
+            "schema": {
+              "type": "string",
+              "example": "coup_abc123"
+            },
             "required": true,
             "name": "id",
             "in": "path"
@@ -608,7 +895,11 @@
           "200": {
             "description": "Coupon details",
             "content": {
-              "application/json": { "schema": { "nullable": true } }
+              "application/json": {
+                "schema": {
+                  "nullable": true
+                }
+              }
             }
           }
         }
@@ -621,7 +912,10 @@
         "description": "Archives a coupon, automatically deactivating it.",
         "parameters": [
           {
-            "schema": { "type": "string", "example": "coup_abc123" },
+            "schema": {
+              "type": "string",
+              "example": "coup_abc123"
+            },
             "required": true,
             "name": "id",
             "in": "path"
@@ -631,7 +925,11 @@
           "200": {
             "description": "Coupon archived",
             "content": {
-              "application/json": { "schema": { "nullable": true } }
+              "application/json": {
+                "schema": {
+                  "nullable": true
+                }
+              }
             }
           }
         }
@@ -648,15 +946,20 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "invoiceId": { "type": "string", "minLength": 1 },
+                  "invoice_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
                   "amount": {
                     "type": "number",
                     "minimum": 0,
                     "exclusiveMinimum": true
                   },
-                  "reason": { "type": "string" }
+                  "reason": {
+                    "type": "string"
+                  }
                 },
-                "required": ["invoiceId", "amount"]
+                "required": ["invoice_id", "amount"]
               }
             }
           }
@@ -665,10 +968,16 @@
           "201": {
             "description": "Credit note created",
             "content": {
-              "application/json": { "schema": { "nullable": true } }
+              "application/json": {
+                "schema": {
+                  "nullable": true
+                }
+              }
             }
           },
-          "400": { "description": "Validation error" }
+          "400": {
+            "description": "Validation error"
+          }
         }
       },
       "get": {
@@ -677,13 +986,18 @@
         "description": "Retrieves credit notes with optional filters.",
         "parameters": [
           {
-            "schema": { "type": "string" },
+            "schema": {
+              "type": "string"
+            },
             "required": false,
-            "name": "invoiceId",
+            "name": "invoice_id",
             "in": "query"
           },
           {
-            "schema": { "type": "string", "enum": ["issued", "void"] },
+            "schema": {
+              "type": "string",
+              "enum": ["issued", "void"]
+            },
             "required": false,
             "name": "status",
             "in": "query"
@@ -694,7 +1008,12 @@
             "description": "List of credit notes",
             "content": {
               "application/json": {
-                "schema": { "type": "array", "items": { "nullable": true } }
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "nullable": true
+                  }
+                }
               }
             }
           }
@@ -708,7 +1027,10 @@
         "description": "Retrieves a single credit note by ID.",
         "parameters": [
           {
-            "schema": { "type": "string", "example": "cn_abc123" },
+            "schema": {
+              "type": "string",
+              "example": "cn_abc123"
+            },
             "required": true,
             "name": "id",
             "in": "path"
@@ -718,7 +1040,11 @@
           "200": {
             "description": "Credit note details",
             "content": {
-              "application/json": { "schema": { "nullable": true } }
+              "application/json": {
+                "schema": {
+                  "nullable": true
+                }
+              }
             }
           }
         }
@@ -728,26 +1054,51 @@
       "post": {
         "tags": ["Customers"],
         "summary": "Create a customer",
-        "description": "Creates a new customer record linked to an environment.",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
                 "properties": {
-                  "environmentId": { "type": "string" },
-                  "userId": { "type": "string" },
-                  "providerId": { "type": "string" },
-                  "externalId": { "type": "string" },
-                  "email": { "type": "string", "format": "email" },
-                  "name": { "type": "string", "minLength": 1 },
-                  "phone": { "type": "string" }
+                  "environment_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "user_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "provider_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "external_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "phone": {
+                    "type": "string"
+                  },
+                  "metadata": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "nullable": true
+                    }
+                  }
                 },
                 "required": [
-                  "environmentId",
-                  "userId",
-                  "providerId",
-                  "externalId",
+                  "environment_id",
+                  "user_id",
+                  "provider_id",
+                  "external_id",
                   "email",
                   "name"
                 ]
@@ -757,112 +1108,127 @@
         },
         "responses": {
           "201": {
-            "description": "Customer created successfully",
+            "description": "Created",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "id": { "type": "string" },
-                    "success": { "type": "boolean" }
+                    "id": {
+                      "type": "string"
+                    }
                   },
-                  "required": ["id", "success"]
+                  "required": ["id"]
                 }
               }
             }
-          },
-          "400": { "description": "Validation error" }
+          }
         }
       },
       "get": {
         "tags": ["Customers"],
         "summary": "List customers",
-        "description": "Retrieves all customers for a given environment.",
         "parameters": [
           {
-            "schema": { "type": "string", "example": "env_abc123" },
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
             "required": true,
-            "name": "environmentId",
+            "name": "environment_id",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "number",
+              "default": 10
+            },
+            "required": false,
+            "name": "limit",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "number",
+              "default": 0
+            },
+            "required": false,
+            "name": "offset",
             "in": "query"
           }
         ],
         "responses": {
           "200": {
-            "description": "List of customers",
+            "description": "Customer List",
             "content": {
               "application/json": {
-                "schema": { "type": "array", "items": { "nullable": true } }
-              }
-            }
-          },
-          "400": { "description": "Missing environmentId" }
-        }
-      }
-    },
-    "/v1/customers/bulk": {
-      "post": {
-        "tags": ["Customers"],
-        "summary": "Bulk create customers",
-        "description": "Creates multiple customer records in a single request.",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "customers": {
-                    "type": "array",
-                    "items": {
-                      "type": "object",
-                      "properties": {
-                        "environmentId": { "type": "string", "minLength": 1 },
-                        "userId": { "type": "string", "minLength": 1 },
-                        "providerId": { "type": "string", "minLength": 1 },
-                        "externalId": { "type": "string", "minLength": 1 },
-                        "email": { "type": "string", "format": "email" },
-                        "name": { "type": "string", "minLength": 1 },
-                        "phone": { "type": "string" },
-                        "metadata": {
-                          "type": "object",
-                          "additionalProperties": { "nullable": true }
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "environment_id": {
+                        "type": "string"
+                      },
+                      "user_id": {
+                        "type": "string"
+                      },
+                      "email": {
+                        "type": "string",
+                        "format": "email"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "external_id": {
+                        "type": "string"
+                      },
+                      "phone": {
+                        "type": "string",
+                        "nullable": true
+                      },
+                      "metadata": {
+                        "type": "object",
+                        "nullable": true,
+                        "additionalProperties": {
+                          "nullable": true
                         }
                       },
-                      "required": [
-                        "environmentId",
-                        "userId",
-                        "providerId",
-                        "externalId",
-                        "email",
-                        "name"
-                      ]
+                      "created_at": {
+                        "type": "string"
+                      }
                     },
-                    "minItems": 1
+                    "required": [
+                      "id",
+                      "environment_id",
+                      "user_id",
+                      "email",
+                      "name",
+                      "external_id",
+                      "phone",
+                      "metadata",
+                      "created_at"
+                    ]
                   }
-                },
-                "required": ["customers"]
+                }
               }
             }
           }
-        },
-        "responses": {
-          "201": {
-            "description": "Customers created",
-            "content": {
-              "application/json": { "schema": { "nullable": true } }
-            }
-          },
-          "400": { "description": "Validation error" }
         }
       }
     },
     "/v1/customers/{id}": {
-      "delete": {
+      "get": {
         "tags": ["Customers"],
-        "summary": "Delete a customer",
-        "description": "Permanently deletes a customer by their ID.",
+        "summary": "Retrieve a customer",
         "parameters": [
           {
-            "schema": { "type": "string", "example": "cust_abc123" },
+            "schema": {
+              "type": "string"
+            },
             "required": true,
             "name": "id",
             "in": "path"
@@ -870,19 +1236,118 @@
         ],
         "responses": {
           "200": {
-            "description": "Customer deleted",
+            "description": "Customer Found",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": { "type": "boolean" },
-                    "message": { "type": "string" }
-                  },
-                  "required": ["success", "message"]
+                  "nullable": true
                 }
               }
             }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Customers"],
+        "summary": "Delete a customer",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "required": true,
+            "name": "environment_id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Deleted"
+          }
+        }
+      }
+    },
+    "/v1/customers/bulk": {
+      "post": {
+        "tags": ["Customers"],
+        "summary": "Bulk create customers",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "environment_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "customers": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "user_id": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "provider_id": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "external_id": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "email": {
+                          "type": "string",
+                          "format": "email"
+                        },
+                        "name": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "phone": {
+                          "type": "string"
+                        },
+                        "metadata": {
+                          "type": "object",
+                          "additionalProperties": {
+                            "nullable": true
+                          }
+                        }
+                      },
+                      "required": [
+                        "user_id",
+                        "provider_id",
+                        "external_id",
+                        "email",
+                        "name"
+                      ]
+                    },
+                    "minItems": 1
+                  }
+                },
+                "required": ["environment_id", "customers"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Bulk success"
           }
         }
       }
@@ -894,13 +1359,25 @@
         "description": "Retrieves all entitlements for a given environment.",
         "parameters": [
           {
-            "schema": { "type": "number" },
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "name": "environment_id",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "number"
+            },
             "required": false,
             "name": "limit",
             "in": "query"
           },
           {
-            "schema": { "type": "number" },
+            "schema": {
+              "type": "number"
+            },
             "required": false,
             "name": "offset",
             "in": "query"
@@ -911,7 +1388,12 @@
             "description": "List of entitlements",
             "content": {
               "application/json": {
-                "schema": { "type": "array", "items": { "nullable": true } }
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "nullable": true
+                  }
+                }
               }
             }
           }
@@ -927,12 +1409,49 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "name": { "type": "string", "minLength": 1 },
-                  "featureId": { "type": "string", "minLength": 1 },
-                  "type": { "type": "string", "enum": ["boolean", "metered"] },
-                  "limit": { "type": "integer" }
+                  "environment_id": {
+                    "type": "string"
+                  },
+                  "slug": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": ["boolean", "metered", "static", "json"]
+                  },
+                  "unit_type": {
+                    "type": "string",
+                    "enum": [
+                      "count",
+                      "bytes",
+                      "seconds",
+                      "tokens",
+                      "requests",
+                      "custom"
+                    ]
+                  },
+                  "metadata": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "nullable": true
+                    }
+                  }
                 },
-                "required": ["name", "featureId", "type"]
+                "required": [
+                  "environment_id",
+                  "slug",
+                  "name",
+                  "type",
+                  "unit_type"
+                ]
               }
             }
           }
@@ -941,10 +1460,16 @@
           "201": {
             "description": "Entitlement created",
             "content": {
-              "application/json": { "schema": { "nullable": true } }
+              "application/json": {
+                "schema": {
+                  "nullable": true
+                }
+              }
             }
           },
-          "400": { "description": "Validation error" }
+          "400": {
+            "description": "Validation error"
+          }
         }
       }
     },
@@ -955,7 +1480,10 @@
         "description": "Permanently removes an entitlement definition.",
         "parameters": [
           {
-            "schema": { "type": "string", "example": "ent_abc123" },
+            "schema": {
+              "type": "string",
+              "example": "ent_abc123"
+            },
             "required": true,
             "name": "id",
             "in": "path"
@@ -965,7 +1493,11 @@
           "200": {
             "description": "Entitlement deleted",
             "content": {
-              "application/json": { "schema": { "nullable": true } }
+              "application/json": {
+                "schema": {
+                  "nullable": true
+                }
+              }
             }
           }
         }
@@ -982,10 +1514,23 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "name": { "type": "string", "minLength": 1 },
-                  "projectId": { "type": "string", "minLength": 1 }
+                  "name": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "slug": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "is_default": {
+                    "type": "boolean",
+                    "default": false
+                  },
+                  "project_id": {
+                    "type": "string"
+                  }
                 },
-                "required": ["name", "projectId"]
+                "required": ["name", "slug"]
               }
             }
           }
@@ -994,7 +1539,11 @@
           "201": {
             "description": "Environment created",
             "content": {
-              "application/json": { "schema": { "nullable": true } }
+              "application/json": {
+                "schema": {
+                  "nullable": true
+                }
+              }
             }
           }
         }
@@ -1007,7 +1556,10 @@
         "description": "Retrieves a specific environment by ID.",
         "parameters": [
           {
-            "schema": { "type": "string", "example": "env_abc123" },
+            "schema": {
+              "type": "string",
+              "example": "env_abc123"
+            },
             "required": true,
             "name": "id",
             "in": "path"
@@ -1017,7 +1569,11 @@
           "200": {
             "description": "Environment details",
             "content": {
-              "application/json": { "schema": { "nullable": true } }
+              "application/json": {
+                "schema": {
+                  "nullable": true
+                }
+              }
             }
           }
         }
@@ -1028,7 +1584,10 @@
         "description": "Updates the name of an existing environment.",
         "parameters": [
           {
-            "schema": { "type": "string", "example": "env_abc123" },
+            "schema": {
+              "type": "string",
+              "example": "env_abc123"
+            },
             "required": true,
             "name": "id",
             "in": "path"
@@ -1039,8 +1598,16 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": { "name": { "type": "string", "minLength": 1 } },
-                "required": ["name"]
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": ["id", "name"]
               }
             }
           }
@@ -1049,7 +1616,11 @@
           "200": {
             "description": "Environment updated",
             "content": {
-              "application/json": { "schema": { "nullable": true } }
+              "application/json": {
+                "schema": {
+                  "nullable": true
+                }
+              }
             }
           }
         }
@@ -1060,7 +1631,10 @@
         "description": "Permanently deletes an environment and all associated data.",
         "parameters": [
           {
-            "schema": { "type": "string", "example": "env_abc123" },
+            "schema": {
+              "type": "string",
+              "example": "env_abc123"
+            },
             "required": true,
             "name": "id",
             "in": "path"
@@ -1074,8 +1648,12 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "success": { "type": "boolean" },
-                    "message": { "type": "string" }
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
                   },
                   "required": ["success", "message"]
                 }
@@ -1096,10 +1674,14 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "providerId": { "type": "string" },
+                  "providerId": {
+                    "type": "string"
+                  },
                   "config": {
                     "type": "object",
-                    "additionalProperties": { "nullable": true }
+                    "additionalProperties": {
+                      "nullable": true
+                    }
                   }
                 },
                 "required": ["providerId", "config"]
@@ -1111,7 +1693,11 @@
           "201": {
             "description": "Integration installed",
             "content": {
-              "application/json": { "schema": { "nullable": true } }
+              "application/json": {
+                "schema": {
+                  "nullable": true
+                }
+              }
             }
           }
         }
@@ -1131,7 +1717,9 @@
             "in": "query"
           },
           {
-            "schema": { "type": "string" },
+            "schema": {
+              "type": "string"
+            },
             "required": false,
             "name": "providerId",
             "in": "query"
@@ -1142,7 +1730,12 @@
             "description": "List of integrations",
             "content": {
               "application/json": {
-                "schema": { "type": "array", "items": { "nullable": true } }
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "nullable": true
+                  }
+                }
               }
             }
           }
@@ -1156,7 +1749,10 @@
         "description": "Retrieves details of a specific integration.",
         "parameters": [
           {
-            "schema": { "type": "string", "example": "int_abc123" },
+            "schema": {
+              "type": "string",
+              "example": "int_abc123"
+            },
             "required": true,
             "name": "id",
             "in": "path"
@@ -1166,7 +1762,11 @@
           "200": {
             "description": "Integration details",
             "content": {
-              "application/json": { "schema": { "nullable": true } }
+              "application/json": {
+                "schema": {
+                  "nullable": true
+                }
+              }
             }
           }
         }
@@ -1179,7 +1779,10 @@
         "description": "Updates the configuration of an installed integration.",
         "parameters": [
           {
-            "schema": { "type": "string", "example": "int_abc123" },
+            "schema": {
+              "type": "string",
+              "example": "int_abc123"
+            },
             "required": true,
             "name": "id",
             "in": "path"
@@ -1193,7 +1796,9 @@
                 "properties": {
                   "config": {
                     "type": "object",
-                    "additionalProperties": { "nullable": true }
+                    "additionalProperties": {
+                      "nullable": true
+                    }
                   }
                 },
                 "required": ["config"]
@@ -1205,7 +1810,11 @@
           "200": {
             "description": "Config updated",
             "content": {
-              "application/json": { "schema": { "nullable": true } }
+              "application/json": {
+                "schema": {
+                  "nullable": true
+                }
+              }
             }
           }
         }
@@ -1222,15 +1831,23 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "customerId": { "type": "string", "minLength": 1 },
+                  "customerId": {
+                    "type": "string",
+                    "minLength": 1
+                  },
                   "currency": {
                     "type": "string",
                     "minLength": 3,
                     "maxLength": 3,
                     "default": "USD"
                   },
-                  "dueDate": { "type": "string", "format": "date-time" },
-                  "idempotencyKey": { "type": "string" }
+                  "dueDate": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "idempotencyKey": {
+                    "type": "string"
+                  }
                 },
                 "required": ["customerId"]
               }
@@ -1245,15 +1862,21 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "id": { "type": "string" },
-                    "success": { "type": "boolean" }
+                    "id": {
+                      "type": "string"
+                    },
+                    "success": {
+                      "type": "boolean"
+                    }
                   },
                   "required": ["id", "success"]
                 }
               }
             }
           },
-          "400": { "description": "Validation error" }
+          "400": {
+            "description": "Validation error"
+          }
         }
       },
       "get": {
@@ -1262,7 +1885,10 @@
         "description": "Retrieves invoices, optionally filtered by customer.",
         "parameters": [
           {
-            "schema": { "type": "string", "example": "cust_abc123" },
+            "schema": {
+              "type": "string",
+              "example": "cust_abc123"
+            },
             "required": false,
             "name": "customerId",
             "in": "query"
@@ -1273,7 +1899,12 @@
             "description": "List of invoices",
             "content": {
               "application/json": {
-                "schema": { "type": "array", "items": { "nullable": true } }
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "nullable": true
+                  }
+                }
               }
             }
           }
@@ -1287,7 +1918,10 @@
         "description": "Retrieves a single invoice by ID with all line items.",
         "parameters": [
           {
-            "schema": { "type": "string", "example": "inv_abc123" },
+            "schema": {
+              "type": "string",
+              "example": "inv_abc123"
+            },
             "required": true,
             "name": "id",
             "in": "path"
@@ -1297,7 +1931,11 @@
           "200": {
             "description": "Invoice details",
             "content": {
-              "application/json": { "schema": { "nullable": true } }
+              "application/json": {
+                "schema": {
+                  "nullable": true
+                }
+              }
             }
           }
         }
@@ -1308,7 +1946,10 @@
         "description": "Updates mutable fields of a draft invoice.",
         "parameters": [
           {
-            "schema": { "type": "string", "example": "inv_abc123" },
+            "schema": {
+              "type": "string",
+              "example": "inv_abc123"
+            },
             "required": true,
             "name": "id",
             "in": "path"
@@ -1320,7 +1961,10 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "dueDate": { "type": "string", "format": "date-time" },
+                  "dueDate": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
                   "status": {
                     "type": "string",
                     "enum": ["draft", "open", "paid", "void", "uncollectible"]
@@ -1334,7 +1978,11 @@
           "200": {
             "description": "Invoice updated",
             "content": {
-              "application/json": { "schema": { "nullable": true } }
+              "application/json": {
+                "schema": {
+                  "nullable": true
+                }
+              }
             }
           }
         }
@@ -1347,7 +1995,10 @@
         "description": "Transitions a draft invoice to finalized status, making it immutable.",
         "parameters": [
           {
-            "schema": { "type": "string", "example": "inv_abc123" },
+            "schema": {
+              "type": "string",
+              "example": "inv_abc123"
+            },
             "required": true,
             "name": "id",
             "in": "path"
@@ -1357,7 +2008,11 @@
           "200": {
             "description": "Invoice finalized",
             "content": {
-              "application/json": { "schema": { "nullable": true } }
+              "application/json": {
+                "schema": {
+                  "nullable": true
+                }
+              }
             }
           }
         }
@@ -1370,7 +2025,10 @@
         "description": "Marks a finalized invoice as void, reversing its financial impact.",
         "parameters": [
           {
-            "schema": { "type": "string", "example": "inv_abc123" },
+            "schema": {
+              "type": "string",
+              "example": "inv_abc123"
+            },
             "required": true,
             "name": "id",
             "in": "path"
@@ -1380,7 +2038,11 @@
           "200": {
             "description": "Invoice voided",
             "content": {
-              "application/json": { "schema": { "nullable": true } }
+              "application/json": {
+                "schema": {
+                  "nullable": true
+                }
+              }
             }
           }
         }
@@ -1393,7 +2055,10 @@
         "description": "Adds a new line item to a draft invoice.",
         "parameters": [
           {
-            "schema": { "type": "string", "example": "inv_abc123" },
+            "schema": {
+              "type": "string",
+              "example": "inv_abc123"
+            },
             "required": true,
             "name": "id",
             "in": "path"
@@ -1405,16 +2070,31 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "name": { "type": "string", "minLength": 1 },
-                  "periodStart": { "type": "string", "format": "date-time" },
-                  "periodEnd": { "type": "string", "format": "date-time" },
-                  "amount": { "type": "integer" },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "periodStart": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "periodEnd": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "amount": {
+                    "type": "integer"
+                  },
                   "currency": {
                     "type": "string",
                     "minLength": 3,
                     "maxLength": 3
                   },
-                  "quantity": { "type": "integer", "minimum": 1, "default": 1 }
+                  "quantity": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "default": 1
+                  }
                 },
                 "required": [
                   "name",
@@ -1431,7 +2111,11 @@
           "201": {
             "description": "Line item added",
             "content": {
-              "application/json": { "schema": { "nullable": true } }
+              "application/json": {
+                "schema": {
+                  "nullable": true
+                }
+              }
             }
           }
         }
@@ -1444,13 +2128,19 @@
         "description": "Updates an existing line item on a draft invoice.",
         "parameters": [
           {
-            "schema": { "type": "string", "example": "inv_abc123" },
+            "schema": {
+              "type": "string",
+              "example": "inv_abc123"
+            },
             "required": true,
             "name": "id",
             "in": "path"
           },
           {
-            "schema": { "type": "string", "example": "li_abc123" },
+            "schema": {
+              "type": "string",
+              "example": "li_abc123"
+            },
             "required": true,
             "name": "lineId",
             "in": "path"
@@ -1462,11 +2152,24 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "name": { "type": "string" },
-                  "periodStart": { "type": "string", "format": "date-time" },
-                  "periodEnd": { "type": "string", "format": "date-time" },
-                  "amount": { "type": "integer" },
-                  "quantity": { "type": "integer", "minimum": 1 }
+                  "name": {
+                    "type": "string"
+                  },
+                  "periodStart": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "periodEnd": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "amount": {
+                    "type": "integer"
+                  },
+                  "quantity": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
                 }
               }
             }
@@ -1476,7 +2179,11 @@
           "200": {
             "description": "Line item updated",
             "content": {
-              "application/json": { "schema": { "nullable": true } }
+              "application/json": {
+                "schema": {
+                  "nullable": true
+                }
+              }
             }
           }
         }
@@ -1487,13 +2194,19 @@
         "description": "Removes a line item from a draft invoice.",
         "parameters": [
           {
-            "schema": { "type": "string", "example": "inv_abc123" },
+            "schema": {
+              "type": "string",
+              "example": "inv_abc123"
+            },
             "required": true,
             "name": "id",
             "in": "path"
           },
           {
-            "schema": { "type": "string", "example": "li_abc123" },
+            "schema": {
+              "type": "string",
+              "example": "li_abc123"
+            },
             "required": true,
             "name": "lineId",
             "in": "path"
@@ -1503,7 +2216,11 @@
           "200": {
             "description": "Line item deleted",
             "content": {
-              "application/json": { "schema": { "nullable": true } }
+              "application/json": {
+                "schema": {
+                  "nullable": true
+                }
+              }
             }
           }
         }
@@ -1520,14 +2237,22 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "invoiceId": { "type": "string", "minLength": 1 },
+                  "invoiceId": {
+                    "type": "string",
+                    "minLength": 1
+                  },
                   "amount": {
                     "type": "number",
                     "minimum": 0,
                     "exclusiveMinimum": true
                   },
-                  "method": { "type": "string", "minLength": 1 },
-                  "idempotencyKey": { "type": "string" }
+                  "method": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "idempotencyKey": {
+                    "type": "string"
+                  }
                 },
                 "required": ["invoiceId", "amount", "method"]
               }
@@ -1538,11 +2263,19 @@
           "201": {
             "description": "Payment processed",
             "content": {
-              "application/json": { "schema": { "nullable": true } }
+              "application/json": {
+                "schema": {
+                  "nullable": true
+                }
+              }
             }
           },
-          "400": { "description": "Validation error" },
-          "409": { "description": "Idempotency conflict" }
+          "400": {
+            "description": "Validation error"
+          },
+          "409": {
+            "description": "Idempotency conflict"
+          }
         }
       },
       "get": {
@@ -1551,13 +2284,19 @@
         "description": "Retrieves all payments, optionally filtered by invoice or customer.",
         "parameters": [
           {
-            "schema": { "type": "string", "example": "inv_abc123" },
+            "schema": {
+              "type": "string",
+              "example": "inv_abc123"
+            },
             "required": false,
             "name": "invoiceId",
             "in": "query"
           },
           {
-            "schema": { "type": "string", "example": "cust_abc123" },
+            "schema": {
+              "type": "string",
+              "example": "cust_abc123"
+            },
             "required": false,
             "name": "customerId",
             "in": "query"
@@ -1568,7 +2307,12 @@
             "description": "List of payments",
             "content": {
               "application/json": {
-                "schema": { "type": "array", "items": { "nullable": true } }
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "nullable": true
+                  }
+                }
               }
             }
           }
@@ -1582,7 +2326,10 @@
         "description": "Retrieves a single payment by ID.",
         "parameters": [
           {
-            "schema": { "type": "string", "example": "pay_abc123" },
+            "schema": {
+              "type": "string",
+              "example": "pay_abc123"
+            },
             "required": true,
             "name": "id",
             "in": "path"
@@ -1592,7 +2339,11 @@
           "200": {
             "description": "Payment details",
             "content": {
-              "application/json": { "schema": { "nullable": true } }
+              "application/json": {
+                "schema": {
+                  "nullable": true
+                }
+              }
             }
           }
         }
@@ -1605,7 +2356,10 @@
         "description": "Links an entitlement definition to a plan with optional limits.",
         "parameters": [
           {
-            "schema": { "type": "string", "example": "plan_abc123" },
+            "schema": {
+              "type": "string",
+              "example": "plan_abc123"
+            },
             "required": true,
             "name": "planId",
             "in": "path"
@@ -1617,8 +2371,14 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "entitlementId": { "type": "string", "minLength": 1 },
-                  "limit": { "type": "integer", "minimum": 0 }
+                  "entitlementId": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "limit": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
                 },
                 "required": ["entitlementId"]
               }
@@ -1629,10 +2389,16 @@
           "201": {
             "description": "Plan entitlement created",
             "content": {
-              "application/json": { "schema": { "nullable": true } }
+              "application/json": {
+                "schema": {
+                  "nullable": true
+                }
+              }
             }
           },
-          "400": { "description": "Validation error" }
+          "400": {
+            "description": "Validation error"
+          }
         }
       }
     },
@@ -1643,7 +2409,10 @@
         "description": "Retrieves all entitlements linked to plans, optionally filtered by planId.",
         "parameters": [
           {
-            "schema": { "type": "string", "minLength": 1 },
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
             "required": true,
             "name": "planId",
             "in": "query"
@@ -1654,7 +2423,12 @@
             "description": "List of plan entitlements",
             "content": {
               "application/json": {
-                "schema": { "type": "array", "items": { "nullable": true } }
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "nullable": true
+                  }
+                }
               }
             }
           }
@@ -1668,13 +2442,19 @@
         "description": "Retrieves a specific plan-entitlement association by composite key.",
         "parameters": [
           {
-            "schema": { "type": "string", "example": "plan_abc123" },
+            "schema": {
+              "type": "string",
+              "example": "plan_abc123"
+            },
             "required": true,
             "name": "planId",
             "in": "path"
           },
           {
-            "schema": { "type": "string", "example": "ent_abc123" },
+            "schema": {
+              "type": "string",
+              "example": "ent_abc123"
+            },
             "required": true,
             "name": "entitlementId",
             "in": "path"
@@ -1684,7 +2464,11 @@
           "200": {
             "description": "Plan entitlement details",
             "content": {
-              "application/json": { "schema": { "nullable": true } }
+              "application/json": {
+                "schema": {
+                  "nullable": true
+                }
+              }
             }
           }
         }
@@ -1695,13 +2479,19 @@
         "description": "Updates the limit values for a plan-entitlement association.",
         "parameters": [
           {
-            "schema": { "type": "string", "example": "plan_abc123" },
+            "schema": {
+              "type": "string",
+              "example": "plan_abc123"
+            },
             "required": true,
             "name": "planId",
             "in": "path"
           },
           {
-            "schema": { "type": "string", "example": "ent_abc123" },
+            "schema": {
+              "type": "string",
+              "example": "ent_abc123"
+            },
             "required": true,
             "name": "entitlementId",
             "in": "path"
@@ -1712,7 +2502,12 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": { "limit": { "type": "integer", "minimum": 0 } }
+                "properties": {
+                  "limit": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                }
               }
             }
           }
@@ -1721,7 +2516,11 @@
           "200": {
             "description": "Plan entitlement limits updated",
             "content": {
-              "application/json": { "schema": { "nullable": true } }
+              "application/json": {
+                "schema": {
+                  "nullable": true
+                }
+              }
             }
           }
         }
@@ -1732,13 +2531,19 @@
         "description": "Removes a plan-entitlement association.",
         "parameters": [
           {
-            "schema": { "type": "string", "example": "plan_abc123" },
+            "schema": {
+              "type": "string",
+              "example": "plan_abc123"
+            },
             "required": true,
             "name": "planId",
             "in": "path"
           },
           {
-            "schema": { "type": "string", "example": "ent_abc123" },
+            "schema": {
+              "type": "string",
+              "example": "ent_abc123"
+            },
             "required": true,
             "name": "entitlementId",
             "in": "path"
@@ -1748,7 +2553,11 @@
           "200": {
             "description": "Plan entitlement removed",
             "content": {
-              "application/json": { "schema": { "nullable": true } }
+              "application/json": {
+                "schema": {
+                  "nullable": true
+                }
+              }
             }
           }
         }
@@ -1765,8 +2574,13 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "name": { "type": "string", "minLength": 1 },
-                  "description": { "type": "string" },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "description": {
+                    "type": "string"
+                  },
                   "currency": {
                     "type": "string",
                     "minLength": 3,
@@ -1786,15 +2600,21 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "id": { "type": "string" },
-                    "success": { "type": "boolean" }
+                    "id": {
+                      "type": "string"
+                    },
+                    "success": {
+                      "type": "boolean"
+                    }
                   },
                   "required": ["id", "success"]
                 }
               }
             }
           },
-          "400": { "description": "Validation error" }
+          "400": {
+            "description": "Validation error"
+          }
         }
       },
       "get": {
@@ -1806,7 +2626,12 @@
             "description": "List of plans",
             "content": {
               "application/json": {
-                "schema": { "type": "array", "items": { "nullable": true } }
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "nullable": true
+                  }
+                }
               }
             }
           }
@@ -1820,7 +2645,10 @@
         "description": "Marks a plan as archived, preventing new subscriptions.",
         "parameters": [
           {
-            "schema": { "type": "string", "example": "plan_abc123" },
+            "schema": {
+              "type": "string",
+              "example": "plan_abc123"
+            },
             "required": true,
             "name": "id",
             "in": "path"
@@ -1834,8 +2662,12 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "success": { "type": "boolean" },
-                    "message": { "type": "string" }
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
                   },
                   "required": ["success", "message"]
                 }
@@ -1852,7 +2684,10 @@
         "description": "Hides a plan from public visibility while keeping it active for existing subscribers.",
         "parameters": [
           {
-            "schema": { "type": "string", "example": "plan_abc123" },
+            "schema": {
+              "type": "string",
+              "example": "plan_abc123"
+            },
             "required": true,
             "name": "id",
             "in": "path"
@@ -1866,8 +2701,12 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "success": { "type": "boolean" },
-                    "message": { "type": "string" }
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
                   },
                   "required": ["success", "message"]
                 }
@@ -1888,9 +2727,18 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "environmentId": { "type": "string", "minLength": 1 },
-                  "name": { "type": "string", "minLength": 1 },
-                  "amount": { "type": "integer", "minimum": 0 },
+                  "environmentId": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "amount": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
                   "currency": {
                     "type": "string",
                     "minLength": 3,
@@ -1904,11 +2752,17 @@
                     "type": "string",
                     "enum": ["recurring", "one_time"]
                   },
-                  "planId": { "type": "string" },
-                  "addonId": { "type": "string" },
+                  "planId": {
+                    "type": "string"
+                  },
+                  "addonId": {
+                    "type": "string"
+                  },
                   "metadata": {
                     "type": "object",
-                    "additionalProperties": { "nullable": true }
+                    "additionalProperties": {
+                      "nullable": true
+                    }
                   }
                 },
                 "required": [
@@ -1926,10 +2780,16 @@
           "201": {
             "description": "Price created",
             "content": {
-              "application/json": { "schema": { "nullable": true } }
+              "application/json": {
+                "schema": {
+                  "nullable": true
+                }
+              }
             }
           },
-          "400": { "description": "Validation error" }
+          "400": {
+            "description": "Validation error"
+          }
         }
       },
       "get": {
@@ -1938,25 +2798,35 @@
         "description": "Retrieves prices with optional filtering by plan, environment, or archive status.",
         "parameters": [
           {
-            "schema": { "type": "string", "minLength": 1 },
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
             "required": true,
             "name": "environmentId",
             "in": "query"
           },
           {
-            "schema": { "type": "string" },
+            "schema": {
+              "type": "string"
+            },
             "required": false,
             "name": "planId",
             "in": "query"
           },
           {
-            "schema": { "type": "string" },
+            "schema": {
+              "type": "string"
+            },
             "required": false,
             "name": "addonId",
             "in": "query"
           },
           {
-            "schema": { "type": "string", "enum": ["true", "false"] },
+            "schema": {
+              "type": "string",
+              "enum": ["true", "false"]
+            },
             "required": false,
             "name": "isArchived",
             "in": "query"
@@ -1967,7 +2837,12 @@
             "description": "List of prices",
             "content": {
               "application/json": {
-                "schema": { "type": "array", "items": { "nullable": true } }
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "nullable": true
+                  }
+                }
               }
             }
           }
@@ -1981,7 +2856,10 @@
         "description": "Updates mutable fields of an existing price (name, metadata).",
         "parameters": [
           {
-            "schema": { "type": "string", "example": "price_abc123" },
+            "schema": {
+              "type": "string",
+              "example": "price_abc123"
+            },
             "required": true,
             "name": "id",
             "in": "path"
@@ -1993,10 +2871,14 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "name": { "type": "string" },
+                  "name": {
+                    "type": "string"
+                  },
                   "metadata": {
                     "type": "object",
-                    "additionalProperties": { "nullable": true }
+                    "additionalProperties": {
+                      "nullable": true
+                    }
                   }
                 }
               }
@@ -2007,7 +2889,11 @@
           "200": {
             "description": "Price updated",
             "content": {
-              "application/json": { "schema": { "nullable": true } }
+              "application/json": {
+                "schema": {
+                  "nullable": true
+                }
+              }
             }
           }
         }
@@ -2018,7 +2904,10 @@
         "description": "Retrieves a single price by ID.",
         "parameters": [
           {
-            "schema": { "type": "string", "example": "price_abc123" },
+            "schema": {
+              "type": "string",
+              "example": "price_abc123"
+            },
             "required": true,
             "name": "id",
             "in": "path"
@@ -2028,7 +2917,11 @@
           "200": {
             "description": "Price details",
             "content": {
-              "application/json": { "schema": { "nullable": true } }
+              "application/json": {
+                "schema": {
+                  "nullable": true
+                }
+              }
             }
           }
         }
@@ -2041,7 +2934,10 @@
         "description": "Archives the current price and creates a new version with updated amount.",
         "parameters": [
           {
-            "schema": { "type": "string", "example": "price_abc123" },
+            "schema": {
+              "type": "string",
+              "example": "price_abc123"
+            },
             "required": true,
             "name": "id",
             "in": "path"
@@ -2053,7 +2949,10 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "amount": { "type": "integer", "minimum": 0 },
+                  "amount": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
                   "currency": {
                     "type": "string",
                     "minLength": 3,
@@ -2069,7 +2968,11 @@
           "201": {
             "description": "New price version created",
             "content": {
-              "application/json": { "schema": { "nullable": true } }
+              "application/json": {
+                "schema": {
+                  "nullable": true
+                }
+              }
             }
           }
         }
@@ -2086,12 +2989,20 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "providerId": { "type": "string" },
-                  "externalEventId": { "type": "string" },
-                  "eventType": { "type": "string" },
+                  "providerId": {
+                    "type": "string"
+                  },
+                  "externalEventId": {
+                    "type": "string"
+                  },
+                  "eventType": {
+                    "type": "string"
+                  },
                   "payload": {
                     "type": "object",
-                    "additionalProperties": { "nullable": true }
+                    "additionalProperties": {
+                      "nullable": true
+                    }
                   }
                 },
                 "required": [
@@ -2108,7 +3019,11 @@
           "201": {
             "description": "Event ingested",
             "content": {
-              "application/json": { "schema": { "nullable": true } }
+              "application/json": {
+                "schema": {
+                  "nullable": true
+                }
+              }
             }
           }
         }
@@ -2119,7 +3034,9 @@
         "description": "Retrieves ingested provider events with optional filtering.",
         "parameters": [
           {
-            "schema": { "type": "string" },
+            "schema": {
+              "type": "string"
+            },
             "required": false,
             "name": "providerId",
             "in": "query"
@@ -2134,7 +3051,9 @@
             "in": "query"
           },
           {
-            "schema": { "type": "string" },
+            "schema": {
+              "type": "string"
+            },
             "required": false,
             "name": "eventType",
             "in": "query"
@@ -2145,7 +3064,12 @@
             "description": "List of events",
             "content": {
               "application/json": {
-                "schema": { "type": "array", "items": { "nullable": true } }
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "nullable": true
+                  }
+                }
               }
             }
           }
@@ -2159,7 +3083,10 @@
         "description": "Retrieves a single provider event by ID.",
         "parameters": [
           {
-            "schema": { "type": "string", "example": "pevt_abc123" },
+            "schema": {
+              "type": "string",
+              "example": "pevt_abc123"
+            },
             "required": true,
             "name": "id",
             "in": "path"
@@ -2169,7 +3096,11 @@
           "200": {
             "description": "Event details",
             "content": {
-              "application/json": { "schema": { "nullable": true } }
+              "application/json": {
+                "schema": {
+                  "nullable": true
+                }
+              }
             }
           }
         }
@@ -2182,7 +3113,10 @@
         "description": "Creates a refund for a previously processed payment. Supports idempotency keys.",
         "parameters": [
           {
-            "schema": { "type": "string", "example": "pay_abc123" },
+            "schema": {
+              "type": "string",
+              "example": "pay_abc123"
+            },
             "required": true,
             "name": "paymentId",
             "in": "path"
@@ -2199,8 +3133,12 @@
                     "minimum": 0,
                     "exclusiveMinimum": true
                   },
-                  "reason": { "type": "string" },
-                  "idempotencyKey": { "type": "string" }
+                  "reason": {
+                    "type": "string"
+                  },
+                  "idempotencyKey": {
+                    "type": "string"
+                  }
                 },
                 "required": ["amount"]
               }
@@ -2211,11 +3149,19 @@
           "201": {
             "description": "Refund created",
             "content": {
-              "application/json": { "schema": { "nullable": true } }
+              "application/json": {
+                "schema": {
+                  "nullable": true
+                }
+              }
             }
           },
-          "400": { "description": "Validation error" },
-          "409": { "description": "Idempotency conflict" }
+          "400": {
+            "description": "Validation error"
+          },
+          "409": {
+            "description": "Idempotency conflict"
+          }
         }
       }
     },
@@ -2226,7 +3172,10 @@
         "description": "Updates metadata or status of an existing refund.",
         "parameters": [
           {
-            "schema": { "type": "string", "example": "ref_abc123" },
+            "schema": {
+              "type": "string",
+              "example": "ref_abc123"
+            },
             "required": true,
             "name": "id",
             "in": "path"
@@ -2252,7 +3201,11 @@
           "200": {
             "description": "Refund updated",
             "content": {
-              "application/json": { "schema": { "nullable": true } }
+              "application/json": {
+                "schema": {
+                  "nullable": true
+                }
+              }
             }
           }
         }
@@ -2263,7 +3216,10 @@
         "description": "Retrieves a single refund by ID.",
         "parameters": [
           {
-            "schema": { "type": "string", "example": "ref_abc123" },
+            "schema": {
+              "type": "string",
+              "example": "ref_abc123"
+            },
             "required": true,
             "name": "id",
             "in": "path"
@@ -2273,7 +3229,11 @@
           "200": {
             "description": "Refund details",
             "content": {
-              "application/json": { "schema": { "nullable": true } }
+              "application/json": {
+                "schema": {
+                  "nullable": true
+                }
+              }
             }
           }
         }
@@ -2286,7 +3246,10 @@
         "description": "Retrieves all refunds, optionally filtered by payment or customer.",
         "parameters": [
           {
-            "schema": { "type": "string", "example": "pay_abc123" },
+            "schema": {
+              "type": "string",
+              "example": "pay_abc123"
+            },
             "required": false,
             "name": "paymentId",
             "in": "query"
@@ -2297,7 +3260,12 @@
             "description": "List of refunds",
             "content": {
               "application/json": {
-                "schema": { "type": "array", "items": { "nullable": true } }
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "nullable": true
+                  }
+                }
               }
             }
           }
@@ -2315,10 +3283,21 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "email": { "type": "string", "format": "email" },
-                  "passwordHash": { "type": "string", "minLength": 1 },
-                  "name": { "type": "string" },
-                  "isSuperadmin": { "type": "boolean", "default": false }
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "passwordHash": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "isSuperadmin": {
+                    "type": "boolean",
+                    "default": false
+                  }
                 },
                 "required": ["email", "passwordHash"]
               }
@@ -2329,7 +3308,11 @@
           "201": {
             "description": "Admin created",
             "content": {
-              "application/json": { "schema": { "nullable": true } }
+              "application/json": {
+                "schema": {
+                  "nullable": true
+                }
+              }
             }
           }
         }
@@ -2343,7 +3326,12 @@
             "description": "List of admins",
             "content": {
               "application/json": {
-                "schema": { "type": "array", "items": { "nullable": true } }
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "nullable": true
+                  }
+                }
               }
             }
           }
@@ -2357,7 +3345,10 @@
         "description": "Retrieves a studio admin by ID or email address.",
         "parameters": [
           {
-            "schema": { "type": "string", "example": "admin_abc123" },
+            "schema": {
+              "type": "string",
+              "example": "admin_abc123"
+            },
             "required": true,
             "name": "idOrEmail",
             "in": "path"
@@ -2367,7 +3358,11 @@
           "200": {
             "description": "Admin details",
             "content": {
-              "application/json": { "schema": { "nullable": true } }
+              "application/json": {
+                "schema": {
+                  "nullable": true
+                }
+              }
             }
           }
         }
@@ -2380,7 +3375,10 @@
         "description": "Updates name or password of an existing studio admin.",
         "parameters": [
           {
-            "schema": { "type": "string", "example": "admin_abc123" },
+            "schema": {
+              "type": "string",
+              "example": "admin_abc123"
+            },
             "required": true,
             "name": "id",
             "in": "path"
@@ -2392,8 +3390,12 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "name": { "type": "string" },
-                  "passwordHash": { "type": "string" }
+                  "name": {
+                    "type": "string"
+                  },
+                  "passwordHash": {
+                    "type": "string"
+                  }
                 }
               }
             }
@@ -2403,7 +3405,11 @@
           "200": {
             "description": "Admin updated",
             "content": {
-              "application/json": { "schema": { "nullable": true } }
+              "application/json": {
+                "schema": {
+                  "nullable": true
+                }
+              }
             }
           }
         }
@@ -2420,10 +3426,21 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "customerId": { "type": "string", "minLength": 1 },
-                  "planId": { "type": "string", "minLength": 1 },
-                  "priceId": { "type": "string", "minLength": 1 },
-                  "couponId": { "type": "string" }
+                  "customerId": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "planId": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "priceId": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "couponId": {
+                    "type": "string"
+                  }
                 },
                 "required": ["customerId", "planId", "priceId"]
               }
@@ -2438,16 +3455,24 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "id": { "type": "string" },
-                    "success": { "type": "boolean" }
+                    "id": {
+                      "type": "string"
+                    },
+                    "success": {
+                      "type": "boolean"
+                    }
                   },
                   "required": ["id", "success"]
                 }
               }
             }
           },
-          "400": { "description": "Validation error" },
-          "409": { "description": "Duplicate subscription conflict" }
+          "400": {
+            "description": "Validation error"
+          },
+          "409": {
+            "description": "Duplicate subscription conflict"
+          }
         }
       },
       "get": {
@@ -2456,13 +3481,17 @@
         "description": "Retrieves subscriptions with optional filtering.",
         "parameters": [
           {
-            "schema": { "type": "string" },
+            "schema": {
+              "type": "string"
+            },
             "required": false,
             "name": "customerId",
             "in": "query"
           },
           {
-            "schema": { "type": "string" },
+            "schema": {
+              "type": "string"
+            },
             "required": false,
             "name": "planId",
             "in": "query"
@@ -2482,7 +3511,12 @@
             "description": "List of subscriptions",
             "content": {
               "application/json": {
-                "schema": { "type": "array", "items": { "nullable": true } }
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "nullable": true
+                  }
+                }
               }
             }
           }
@@ -2496,7 +3530,10 @@
         "description": "Retrieves all subscriptions for a specific customer.",
         "parameters": [
           {
-            "schema": { "type": "string", "example": "cust_abc123" },
+            "schema": {
+              "type": "string",
+              "example": "cust_abc123"
+            },
             "required": true,
             "name": "customerId",
             "in": "path"
@@ -2507,7 +3544,12 @@
             "description": "Customer subscriptions",
             "content": {
               "application/json": {
-                "schema": { "type": "array", "items": { "nullable": true } }
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "nullable": true
+                  }
+                }
               }
             }
           }
@@ -2521,7 +3563,10 @@
         "description": "Retrieves a single subscription by ID.",
         "parameters": [
           {
-            "schema": { "type": "string", "example": "sub_abc123" },
+            "schema": {
+              "type": "string",
+              "example": "sub_abc123"
+            },
             "required": true,
             "name": "id",
             "in": "path"
@@ -2531,7 +3576,11 @@
           "200": {
             "description": "Subscription details",
             "content": {
-              "application/json": { "schema": { "nullable": true } }
+              "application/json": {
+                "schema": {
+                  "nullable": true
+                }
+              }
             }
           }
         }
@@ -2542,7 +3591,10 @@
         "description": "Updates mutable fields of an existing subscription.",
         "parameters": [
           {
-            "schema": { "type": "string", "example": "sub_abc123" },
+            "schema": {
+              "type": "string",
+              "example": "sub_abc123"
+            },
             "required": true,
             "name": "id",
             "in": "path"
@@ -2554,10 +3606,19 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "planId": { "type": "string" },
-                  "priceId": { "type": "string" },
-                  "couponId": { "type": "string", "nullable": true },
-                  "isAutoRenew": { "type": "boolean" }
+                  "planId": {
+                    "type": "string"
+                  },
+                  "priceId": {
+                    "type": "string"
+                  },
+                  "couponId": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "isAutoRenew": {
+                    "type": "boolean"
+                  }
                 }
               }
             }
@@ -2567,7 +3628,11 @@
           "200": {
             "description": "Subscription updated",
             "content": {
-              "application/json": { "schema": { "nullable": true } }
+              "application/json": {
+                "schema": {
+                  "nullable": true
+                }
+              }
             }
           }
         }
@@ -2580,7 +3645,10 @@
         "description": "Cancels an active subscription, optionally at end of billing period.",
         "parameters": [
           {
-            "schema": { "type": "string", "example": "sub_abc123" },
+            "schema": {
+              "type": "string",
+              "example": "sub_abc123"
+            },
             "required": true,
             "name": "id",
             "in": "path"
@@ -2590,7 +3658,11 @@
           "200": {
             "description": "Subscription cancelled",
             "content": {
-              "application/json": { "schema": { "nullable": true } }
+              "application/json": {
+                "schema": {
+                  "nullable": true
+                }
+              }
             }
           }
         }
@@ -2607,16 +3679,27 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "environmentId": { "type": "string", "minLength": 1 },
-                  "name": { "type": "string", "minLength": 1 },
-                  "type": { "type": "string", "enum": ["public", "secret"] },
+                  "environment_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": ["public", "secret"]
+                  },
                   "scopes": {
                     "type": "array",
-                    "items": { "type": "string" },
+                    "items": {
+                      "type": "string"
+                    },
                     "default": []
                   }
                 },
-                "required": ["environmentId", "name", "type"]
+                "required": ["environment_id", "name", "type"]
               }
             }
           }
@@ -2625,7 +3708,11 @@
           "201": {
             "description": "API key created",
             "content": {
-              "application/json": { "schema": { "nullable": true } }
+              "application/json": {
+                "schema": {
+                  "nullable": true
+                }
+              }
             }
           }
         }
@@ -2636,13 +3723,19 @@
         "description": "Retrieves all API keys for an environment (without plain-text values).",
         "parameters": [
           {
-            "schema": { "type": "string", "minLength": 1 },
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
             "required": true,
             "name": "environmentId",
             "in": "query"
           },
           {
-            "schema": { "type": "string", "enum": ["public", "secret"] },
+            "schema": {
+              "type": "string",
+              "enum": ["public", "secret"]
+            },
             "required": false,
             "name": "type",
             "in": "query"
@@ -2653,7 +3746,12 @@
             "description": "List of API keys",
             "content": {
               "application/json": {
-                "schema": { "type": "array", "items": { "nullable": true } }
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "nullable": true
+                  }
+                }
               }
             }
           }
@@ -2667,7 +3765,10 @@
         "description": "Retrieves metadata for a specific API key.",
         "parameters": [
           {
-            "schema": { "type": "string", "example": "sk_live_abc123" },
+            "schema": {
+              "type": "string",
+              "example": "sk_live_abc123"
+            },
             "required": true,
             "name": "key",
             "in": "path"
@@ -2677,7 +3778,11 @@
           "200": {
             "description": "API key details",
             "content": {
-              "application/json": { "schema": { "nullable": true } }
+              "application/json": {
+                "schema": {
+                  "nullable": true
+                }
+              }
             }
           }
         }
@@ -2688,7 +3793,10 @@
         "description": "Updates the name or scopes of an existing API key.",
         "parameters": [
           {
-            "schema": { "type": "string", "example": "sk_live_abc123" },
+            "schema": {
+              "type": "string",
+              "example": "sk_live_abc123"
+            },
             "required": true,
             "name": "key",
             "in": "path"
@@ -2700,9 +3808,24 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "name": { "type": "string" },
-                  "scopes": { "type": "array", "items": { "type": "string" } }
-                }
+                  "id": {
+                    "type": "string"
+                  },
+                  "environment_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "scopes": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": ["id", "environment_id"]
               }
             }
           }
@@ -2711,7 +3834,11 @@
           "200": {
             "description": "API key updated",
             "content": {
-              "application/json": { "schema": { "nullable": true } }
+              "application/json": {
+                "schema": {
+                  "nullable": true
+                }
+              }
             }
           }
         }
@@ -2722,7 +3849,10 @@
         "description": "Permanently deletes an API key.",
         "parameters": [
           {
-            "schema": { "type": "string", "example": "sk_live_abc123" },
+            "schema": {
+              "type": "string",
+              "example": "sk_live_abc123"
+            },
             "required": true,
             "name": "key",
             "in": "path"
@@ -2736,8 +3866,12 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "success": { "type": "boolean" },
-                    "message": { "type": "string" }
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
                   },
                   "required": ["success", "message"]
                 }
@@ -2754,7 +3888,10 @@
         "description": "Generates a new key value and archives the old one.",
         "parameters": [
           {
-            "schema": { "type": "string", "example": "sk_live_abc123" },
+            "schema": {
+              "type": "string",
+              "example": "sk_live_abc123"
+            },
             "required": true,
             "name": "key",
             "in": "path"
@@ -2764,7 +3901,11 @@
           "200": {
             "description": "New key generated",
             "content": {
-              "application/json": { "schema": { "nullable": true } }
+              "application/json": {
+                "schema": {
+                  "nullable": true
+                }
+              }
             }
           }
         }
@@ -2779,7 +3920,11 @@
           "200": {
             "description": "Verification result",
             "content": {
-              "application/json": { "schema": { "nullable": true } }
+              "application/json": {
+                "schema": {
+                  "nullable": true
+                }
+              }
             }
           }
         }
@@ -2796,8 +3941,14 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "customerId": { "type": "string", "minLength": 1 },
-                  "featureId": { "type": "string", "minLength": 1 },
+                  "customerId": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "featureId": {
+                    "type": "string",
+                    "minLength": 1
+                  },
                   "amount": {
                     "type": "number",
                     "minimum": 0,
@@ -2817,8 +3968,12 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "id": { "type": "string" },
-                    "success": { "type": "boolean" }
+                    "id": {
+                      "type": "string"
+                    },
+                    "success": {
+                      "type": "boolean"
+                    }
                   },
                   "required": ["id", "success"]
                 }
@@ -2835,13 +3990,19 @@
         "description": "Retrieves the current usage meter for a customer-feature pair.",
         "parameters": [
           {
-            "schema": { "type": "string", "example": "cust_abc123" },
+            "schema": {
+              "type": "string",
+              "example": "cust_abc123"
+            },
             "required": true,
             "name": "customerId",
             "in": "path"
           },
           {
-            "schema": { "type": "string", "example": "feat_api_calls" },
+            "schema": {
+              "type": "string",
+              "example": "feat_api_calls"
+            },
             "required": true,
             "name": "featureId",
             "in": "path"
@@ -2851,7 +4012,11 @@
           "200": {
             "description": "Usage meter",
             "content": {
-              "application/json": { "schema": { "nullable": true } }
+              "application/json": {
+                "schema": {
+                  "nullable": true
+                }
+              }
             }
           }
         }
@@ -2864,13 +4029,18 @@
         "description": "Retrieves usage records with optional filtering.",
         "parameters": [
           {
-            "schema": { "type": "string", "minLength": 1 },
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
             "required": true,
             "name": "customerId",
             "in": "query"
           },
           {
-            "schema": { "type": "string" },
+            "schema": {
+              "type": "string"
+            },
             "required": false,
             "name": "featureId",
             "in": "query"
@@ -2881,7 +4051,12 @@
             "description": "List of usage records",
             "content": {
               "application/json": {
-                "schema": { "type": "array", "items": { "nullable": true } }
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "nullable": true
+                  }
+                }
               }
             }
           }
@@ -2899,10 +4074,22 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "customerId": { "type": "string", "minLength": 1 },
-                  "featureId": { "type": "string", "minLength": 1 },
-                  "periodStart": { "type": "string", "format": "date-time" },
-                  "periodEnd": { "type": "string", "format": "date-time" }
+                  "customerId": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "featureId": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "periodStart": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "periodEnd": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
                 },
                 "required": [
                   "customerId",
@@ -2918,7 +4105,11 @@
           "201": {
             "description": "Usage meter created",
             "content": {
-              "application/json": { "schema": { "nullable": true } }
+              "application/json": {
+                "schema": {
+                  "nullable": true
+                }
+              }
             }
           }
         }
@@ -2931,7 +4122,10 @@
         "description": "Updates configuration of an existing usage meter.",
         "parameters": [
           {
-            "schema": { "type": "string", "example": "meter_abc123" },
+            "schema": {
+              "type": "string",
+              "example": "meter_abc123"
+            },
             "required": true,
             "name": "id",
             "in": "path"
@@ -2943,8 +4137,14 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "periodStart": { "type": "string", "format": "date-time" },
-                  "periodEnd": { "type": "string", "format": "date-time" }
+                  "periodStart": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "periodEnd": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
                 }
               }
             }
@@ -2954,7 +4154,11 @@
           "200": {
             "description": "Usage meter updated",
             "content": {
-              "application/json": { "schema": { "nullable": true } }
+              "application/json": {
+                "schema": {
+                  "nullable": true
+                }
+              }
             }
           }
         }
@@ -2971,13 +4175,26 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "environmentId": { "type": "string", "minLength": 1 },
-                  "email": { "type": "string", "format": "email" },
-                  "name": { "type": "string" },
-                  "role": { "type": "string", "minLength": 1 },
+                  "environmentId": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "role": {
+                    "type": "string",
+                    "minLength": 1
+                  },
                   "metadata": {
                     "type": "object",
-                    "additionalProperties": { "nullable": true }
+                    "additionalProperties": {
+                      "nullable": true
+                    }
                   }
                 },
                 "required": ["environmentId", "email", "role"]
@@ -2989,7 +4206,11 @@
           "201": {
             "description": "User created",
             "content": {
-              "application/json": { "schema": { "nullable": true } }
+              "application/json": {
+                "schema": {
+                  "nullable": true
+                }
+              }
             }
           }
         }
@@ -3000,19 +4221,26 @@
         "description": "Retrieves users with optional filtering by environment, role, and status.",
         "parameters": [
           {
-            "schema": { "type": "string" },
+            "schema": {
+              "type": "string"
+            },
             "required": false,
             "name": "environmentId",
             "in": "query"
           },
           {
-            "schema": { "type": "string" },
+            "schema": {
+              "type": "string"
+            },
             "required": false,
             "name": "role",
             "in": "query"
           },
           {
-            "schema": { "type": "string", "enum": ["true", "false"] },
+            "schema": {
+              "type": "string",
+              "enum": ["true", "false"]
+            },
             "required": false,
             "name": "isActive",
             "in": "query"
@@ -3023,7 +4251,12 @@
             "description": "List of users",
             "content": {
               "application/json": {
-                "schema": { "type": "array", "items": { "nullable": true } }
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "nullable": true
+                  }
+                }
               }
             }
           }
@@ -3037,7 +4270,10 @@
         "description": "Retrieves a single user by ID.",
         "parameters": [
           {
-            "schema": { "type": "string", "example": "usr_abc123" },
+            "schema": {
+              "type": "string",
+              "example": "usr_abc123"
+            },
             "required": true,
             "name": "id",
             "in": "path"
@@ -3047,7 +4283,11 @@
           "200": {
             "description": "User details",
             "content": {
-              "application/json": { "schema": { "nullable": true } }
+              "application/json": {
+                "schema": {
+                  "nullable": true
+                }
+              }
             }
           }
         }
@@ -3058,7 +4298,10 @@
         "description": "Updates profile information for an existing user.",
         "parameters": [
           {
-            "schema": { "type": "string", "example": "usr_abc123" },
+            "schema": {
+              "type": "string",
+              "example": "usr_abc123"
+            },
             "required": true,
             "name": "id",
             "in": "path"
@@ -3070,12 +4313,20 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "name": { "type": "string" },
-                  "role": { "type": "string" },
-                  "isActive": { "type": "boolean" },
+                  "name": {
+                    "type": "string"
+                  },
+                  "role": {
+                    "type": "string"
+                  },
+                  "isActive": {
+                    "type": "boolean"
+                  },
                   "metadata": {
                     "type": "object",
-                    "additionalProperties": { "nullable": true }
+                    "additionalProperties": {
+                      "nullable": true
+                    }
                   }
                 }
               }
@@ -3086,7 +4337,11 @@
           "200": {
             "description": "User updated",
             "content": {
-              "application/json": { "schema": { "nullable": true } }
+              "application/json": {
+                "schema": {
+                  "nullable": true
+                }
+              }
             }
           }
         }
@@ -3099,7 +4354,10 @@
         "description": "Adds funds to a customer wallet. Creates an ACID-compliant transaction record.",
         "parameters": [
           {
-            "schema": { "type": "string", "example": "wal_abc123" },
+            "schema": {
+              "type": "string",
+              "example": "wal_abc123"
+            },
             "required": true,
             "name": "walletId",
             "in": "path"
@@ -3116,7 +4374,9 @@
                     "minimum": 0,
                     "exclusiveMinimum": true
                   },
-                  "referenceId": { "type": "string" }
+                  "referenceId": {
+                    "type": "string"
+                  }
                 },
                 "required": ["amount"]
               }
@@ -3127,10 +4387,16 @@
           "201": {
             "description": "Wallet credited",
             "content": {
-              "application/json": { "schema": { "nullable": true } }
+              "application/json": {
+                "schema": {
+                  "nullable": true
+                }
+              }
             }
           },
-          "400": { "description": "Validation error" }
+          "400": {
+            "description": "Validation error"
+          }
         }
       }
     },
@@ -3141,7 +4407,10 @@
         "description": "Withdraws funds from a customer wallet. Fails if insufficient balance.",
         "parameters": [
           {
-            "schema": { "type": "string", "example": "wal_abc123" },
+            "schema": {
+              "type": "string",
+              "example": "wal_abc123"
+            },
             "required": true,
             "name": "walletId",
             "in": "path"
@@ -3158,7 +4427,9 @@
                     "minimum": 0,
                     "exclusiveMinimum": true
                   },
-                  "referenceId": { "type": "string" }
+                  "referenceId": {
+                    "type": "string"
+                  }
                 },
                 "required": ["amount"]
               }
@@ -3169,10 +4440,16 @@
           "201": {
             "description": "Wallet debited",
             "content": {
-              "application/json": { "schema": { "nullable": true } }
+              "application/json": {
+                "schema": {
+                  "nullable": true
+                }
+              }
             }
           },
-          "400": { "description": "Insufficient balance or validation error" }
+          "400": {
+            "description": "Insufficient balance or validation error"
+          }
         }
       }
     },
@@ -3183,7 +4460,10 @@
         "description": "Retrieves the current balance of a customer wallet.",
         "parameters": [
           {
-            "schema": { "type": "string", "example": "cust_abc123" },
+            "schema": {
+              "type": "string",
+              "example": "cust_abc123"
+            },
             "required": true,
             "name": "customerId",
             "in": "path"
@@ -3193,7 +4473,11 @@
           "200": {
             "description": "Wallet balance",
             "content": {
-              "application/json": { "schema": { "nullable": true } }
+              "application/json": {
+                "schema": {
+                  "nullable": true
+                }
+              }
             }
           }
         }
@@ -3206,7 +4490,10 @@
         "description": "Retrieves the transaction history for a specific wallet.",
         "parameters": [
           {
-            "schema": { "type": "string", "example": "wal_abc123" },
+            "schema": {
+              "type": "string",
+              "example": "wal_abc123"
+            },
             "required": true,
             "name": "walletId",
             "in": "path"
@@ -3217,7 +4504,12 @@
             "description": "Transaction history",
             "content": {
               "application/json": {
-                "schema": { "type": "array", "items": { "nullable": true } }
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "nullable": true
+                  }
+                }
               }
             }
           }
@@ -3235,10 +4527,15 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "url": { "type": "string", "format": "uri" },
+                  "url": {
+                    "type": "string",
+                    "format": "uri"
+                  },
                   "events": {
                     "type": "array",
-                    "items": { "type": "string" },
+                    "items": {
+                      "type": "string"
+                    },
                     "minItems": 1
                   }
                 },
@@ -3255,8 +4552,12 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "id": { "type": "string" },
-                    "success": { "type": "boolean" }
+                    "id": {
+                      "type": "string"
+                    },
+                    "success": {
+                      "type": "boolean"
+                    }
                   },
                   "required": ["id", "success"]
                 }
@@ -3274,7 +4575,12 @@
             "description": "List of endpoints",
             "content": {
               "application/json": {
-                "schema": { "type": "array", "items": { "nullable": true } }
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "nullable": true
+                  }
+                }
               }
             }
           }
@@ -3288,7 +4594,10 @@
         "description": "Disables a webhook endpoint from receiving further notifications.",
         "parameters": [
           {
-            "schema": { "type": "string", "example": "wh_abc123" },
+            "schema": {
+              "type": "string",
+              "example": "wh_abc123"
+            },
             "required": true,
             "name": "id",
             "in": "path"
@@ -3298,7 +4607,11 @@
           "200": {
             "description": "Endpoint deactivated",
             "content": {
-              "application/json": { "schema": { "nullable": true } }
+              "application/json": {
+                "schema": {
+                  "nullable": true
+                }
+              }
             }
           }
         }
@@ -3311,7 +4624,10 @@
         "description": "Generates a new signing secret for a webhook endpoint.",
         "parameters": [
           {
-            "schema": { "type": "string", "example": "wh_abc123" },
+            "schema": {
+              "type": "string",
+              "example": "wh_abc123"
+            },
             "required": true,
             "name": "id",
             "in": "path"
@@ -3321,7 +4637,11 @@
           "200": {
             "description": "Secret rotated",
             "content": {
-              "application/json": { "schema": { "nullable": true } }
+              "application/json": {
+                "schema": {
+                  "nullable": true
+                }
+              }
             }
           }
         }
@@ -3334,7 +4654,10 @@
         "description": "Retrieves the delivery log for a specific webhook endpoint.",
         "parameters": [
           {
-            "schema": { "type": "string", "example": "wh_abc123" },
+            "schema": {
+              "type": "string",
+              "example": "wh_abc123"
+            },
             "required": true,
             "name": "id",
             "in": "path"
@@ -3345,7 +4668,12 @@
             "description": "Delivery logs",
             "content": {
               "application/json": {
-                "schema": { "type": "array", "items": { "nullable": true } }
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "nullable": true
+                  }
+                }
               }
             }
           }
