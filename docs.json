@@ -1,45 +1,12 @@
 {
   "$schema": "https://mintlify.com/docs.json",
-  "name": "Revstack",
   "theme": "mint",
-  "favicon": "/logo/logo.png",
+  "name": "Revstack Docs",
   "colors": {
-    "primary": "#ff592c",
+    "primary": "#0D9373",
     "dark": "#ff592c",
     "light": "#ff592c"
   },
-  "logo": {
-    "dark": "/logo/logo.png",
-    "light": "/logo/logo.png"
-  },
-  "api": {
-    "openapi": "openapi.json"
-  },
-  "description": "Open Source Billing OS for Developers. The scalable, developer-first billing engine with subscriptions, invoicing, usage metering, and entitlements.",
-  "fonts": {
-    "body": {
-      "family": "Geist",
-      "format": "woff2",
-      "weight": 400
-    },
-    "heading": {
-      "family": "Geist",
-      "format": "woff2",
-      "weight": 600
-    }
-  },
-  "icons": {
-    "library": "lucide"
-  },
-  "styling": {
-    "codeblocks": "dark"
-  },
-  "redirects": [
-    {
-      "source": "/",
-      "destination": "/guides"
-    }
-  ],
   "navigation": {
     "tabs": [
       {
@@ -74,11 +41,16 @@
           },
           {
             "group": "Security & Identity",
-            "pages": ["guides/authentication"]
+            "pages": [
+              "guides/authentication"
+            ]
           },
           {
             "group": "Integrations",
-            "pages": ["guides/providers/stripe", "guides/providers/polar"]
+            "pages": [
+              "guides/providers/stripe",
+              "guides/providers/polar"
+            ]
           },
           {
             "group": "SDKs & Clients",
@@ -92,7 +64,9 @@
           },
           {
             "group": "Deployment",
-            "pages": ["guides/deployment/self-hosted"]
+            "pages": [
+              "guides/deployment/self-hosted"
+            ]
           }
         ]
       },
@@ -111,5 +85,38 @@
         ]
       }
     ]
-  }
+  },
+  "favicon": "/logo/logo.png",
+  "logo": {
+    "dark": "/logo/logo.png",
+    "light": "/logo/logo.png"
+  },
+  "api": {
+    "openapi": "openapi.json"
+  },
+  "description": "Open Source Billing OS for Developers. The scalable, developer-first billing engine with subscriptions, invoicing, usage metering, and entitlements.",
+  "fonts": {
+    "body": {
+      "family": "Geist",
+      "format": "woff2",
+      "weight": 400
+    },
+    "heading": {
+      "family": "Geist",
+      "format": "woff2",
+      "weight": 600
+    }
+  },
+  "icons": {
+    "library": "lucide"
+  },
+  "styling": {
+    "codeblocks": "dark"
+  },
+  "redirects": [
+    {
+      "source": "/",
+      "destination": "/guides"
+    }
+  ]
 }
